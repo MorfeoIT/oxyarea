@@ -11,6 +11,7 @@ namespace OxyArea\Admin;
 
 use InvalidArgumentException;
 use OxyArea\Access\Subject;
+use OxyArea\Access\SubjectCodec;
 use OxyArea\Auth\Destination;
 use OxyArea\Infrastructure\Brand;
 use OxyArea\Infrastructure\Registrable;
@@ -54,14 +55,23 @@ final class RedirectsScreen implements Registrable {
 	private RedirectService $redirects;
 
 	/**
+	 * Subjects, to and from form values.
+	 *
+	 * @var SubjectCodec
+	 */
+	private SubjectCodec $codec;
+
+	/**
 	 * Build the screen.
 	 *
 	 * @param RuleRepositoryInterface $rules     Where the rules live.
 	 * @param RedirectService         $redirects The engine.
+	 * @param SubjectCodec            $codec     Subjects, to and from form values.
 	 */
-	public function __construct( RuleRepositoryInterface $rules, RedirectService $redirects ) {
+	public function __construct( RuleRepositoryInterface $rules, RedirectService $redirects, SubjectCodec $codec ) {
 		$this->rules     = $rules;
 		$this->redirects = $redirects;
+		$this->codec     = $codec;
 	}
 
 	/**
@@ -343,7 +353,13 @@ final class RedirectsScreen implements Registrable {
 				. '</option>';
 		}
 
-		echo '</select></td></tr>';
+		echo '</select>';
+
+		// Anything this plugin cannot put in an option list draws its own
+		// control here — a person, a company — posting into the same field.
+		$this->codec->render_extra_controls( 'redirect', array() );
+
+		echo '</td></tr>';
 
 		echo '<tr><th scope="row"><label for="oxyarea-redirect-destination">' . esc_html__( 'Goes to', 'oxyarea' ) . '</label></th><td>';
 		echo '<input name="destination" id="oxyarea-redirect-destination" type="text" class="regular-text" placeholder="/customers/" required />';
@@ -367,23 +383,15 @@ final class RedirectsScreen implements Registrable {
 	 * @return Subject|null
 	 */
 	private function subject_from( string $key ): ?Subject {
-		if ( '' === $key ) {
+		$gathered = $this->codec->gather( '' === $key ? array() : array( $key ), 'redirect' );
+
+		if ( array() === $gathered ) {
 			return null;
 		}
 
-		if ( 'authenticated' === $key ) {
-			return Subject::authenticated();
-		}
-
-		if ( 'anonymous' === $key ) {
-			return Subject::anonymous();
-		}
-
-		if ( 0 === strpos( $key, 'role:' ) ) {
-			return Subject::role( sanitize_key( substr( $key, 5 ) ) );
-		}
-
-		return null;
+		// A rule has one audience, and the last word wins, so an add-on's own
+		// control overrides the select rather than being overridden by it.
+		return $this->codec->decode( (string) $gathered[ array_key_last( $gathered ) ] );
 	}
 
 	/**
@@ -399,19 +407,7 @@ final class RedirectsScreen implements Registrable {
 			return __( 'Everybody', 'oxyarea' );
 		}
 
-		switch ( $subject->type() ) {
-			case Subject::AUTHENTICATED:
-				return __( 'Anybody signed in', 'oxyarea' );
-			case Subject::ANONYMOUS:
-				return __( 'Anybody not signed in', 'oxyarea' );
-			case Subject::ROLE:
-				$names = wp_roles()->get_names();
-				$name  = $names[ $subject->id() ] ?? $subject->id();
-
-				return sprintf( /* translators: %s: role name. */ __( 'Role: %s', 'oxyarea' ), translate_user_role( (string) $name ) );
-			default:
-				return $subject->key();
-		}
+		return $this->codec->label( $subject );
 	}
 
 	/**

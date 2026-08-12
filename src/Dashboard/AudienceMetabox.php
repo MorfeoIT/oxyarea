@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace OxyArea\Dashboard;
 
+use OxyArea\Access\SubjectCodec;
 use OxyArea\Infrastructure\Registrable;
 use OxyArea\Persistence\DashboardRepository;
 use OxyArea\Roles\Capabilities;
@@ -36,12 +37,21 @@ final class AudienceMetabox implements Registrable {
 	private DashboardRepository $dashboards;
 
 	/**
+	 * Subjects, to and from form values.
+	 *
+	 * @var SubjectCodec
+	 */
+	private SubjectCodec $codec;
+
+	/**
 	 * Build the metabox.
 	 *
 	 * @param DashboardRepository $dashboards The dashboards.
+	 * @param SubjectCodec        $codec      Subjects, to and from form values.
 	 */
-	public function __construct( DashboardRepository $dashboards ) {
+	public function __construct( DashboardRepository $dashboards, SubjectCodec $codec ) {
 		$this->dashboards = $dashboards;
+		$this->codec      = $codec;
 	}
 
 	/**
@@ -106,6 +116,12 @@ final class AudienceMetabox implements Registrable {
 
 		echo '</select></p>';
 
+		// An add-on may name audiences this list cannot hold. A site with five
+		// thousand customers cannot have all of them in an option list, so what
+		// is offered here is the choice this plugin can draw, and anything else
+		// draws its own control.
+		$this->codec->render_extra_controls( 'dashboard', '' === $current ? array() : array( $current ) );
+
 		echo '<p class="description">'
 			. esc_html__( 'One template serves everybody who holds the role. The site default is what somebody sees when their role has nothing of its own.', 'oxyarea' )
 			. '</p>';
@@ -149,7 +165,16 @@ final class AudienceMetabox implements Registrable {
 			? sanitize_text_field( wp_unslash( $_POST['oxyarea_audience'] ) )
 			: '';
 
-		$chosen = $this->clean( $chosen );
+		$gathered = $this->codec->gather( '' === $chosen ? array() : array( $chosen ), 'dashboard' );
+
+		// A dashboard has one audience, so the last word wins. An add-on's own
+		// control is appended after this plugin's, which is what makes "choose a
+		// person" override "choose a role" rather than the other way round —
+		// the more specific choice is the one somebody went out of their way to
+		// make.
+		$chosen = $this->clean(
+			array() === $gathered ? '' : (string) $gathered[ array_key_last( $gathered ) ]
+		);
 
 		if ( '' === $chosen ) {
 			delete_post_meta( $post_id, DashboardPostType::AUDIENCE_META );
@@ -176,18 +201,8 @@ final class AudienceMetabox implements Registrable {
 	 * @return string
 	 */
 	private function clean( string $chosen ): string {
-		if ( 'authenticated' === $chosen ) {
-			return $chosen;
-		}
+		$subject = $this->codec->decode( $chosen );
 
-		if ( 0 === strpos( $chosen, 'role:' ) ) {
-			$role = sanitize_key( substr( $chosen, 5 ) );
-
-			// A role that does not exist would produce a dashboard nobody can ever
-			// match, which looks like the feature being broken.
-			return '' !== $role && null !== get_role( $role ) ? 'role:' . $role : '';
-		}
-
-		return '';
+		return null === $subject ? '' : $this->codec->encode( $subject );
 	}
 }

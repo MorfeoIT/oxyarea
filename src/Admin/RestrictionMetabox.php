@@ -13,6 +13,7 @@ use OxyArea\Access\Assignment;
 use OxyArea\Access\AssignmentRepositoryInterface;
 use OxyArea\Access\ProtectedResource;
 use OxyArea\Access\Subject;
+use OxyArea\Access\SubjectCodec;
 use OxyArea\Content\Restrictions;
 use OxyArea\Infrastructure\Registrable;
 use WP_Post;
@@ -51,14 +52,23 @@ final class RestrictionMetabox implements Registrable {
 	private Restrictions $restrictions;
 
 	/**
+	 * Subjects, to and from form values.
+	 *
+	 * @var SubjectCodec
+	 */
+	private SubjectCodec $codec;
+
+	/**
 	 * Build the box.
 	 *
 	 * @param AssignmentRepositoryInterface $assignments  Where the rules live.
 	 * @param Restrictions                  $restrictions What is restricted at all.
+	 * @param SubjectCodec                  $codec        Subjects, to and from form values.
 	 */
-	public function __construct( AssignmentRepositoryInterface $assignments, Restrictions $restrictions ) {
+	public function __construct( AssignmentRepositoryInterface $assignments, Restrictions $restrictions, SubjectCodec $codec ) {
 		$this->assignments  = $assignments;
 		$this->restrictions = $restrictions;
+		$this->codec        = $codec;
 	}
 
 	/**
@@ -120,6 +130,8 @@ final class RestrictionMetabox implements Registrable {
 				. esc_html( translate_user_role( (string) $name ) ) . '</label></p>';
 		}
 
+		$this->codec->render_extra_controls( 'restriction', $chosen );
+
 		echo '</div>';
 
 		echo '<p class="description">'
@@ -171,8 +183,8 @@ final class RestrictionMetabox implements Registrable {
 		$assignments = array();
 
 		if ( $restrict ) {
-			foreach ( $posted as $value ) {
-				$subject = $this->subject_from( (string) $value );
+			foreach ( $this->codec->gather( array_values( $posted ), 'restriction' ) as $value ) {
+				$subject = $this->codec->decode( (string) $value );
 
 				if ( null !== $subject ) {
 					$assignments[] = new Assignment( $subject );
@@ -202,39 +214,13 @@ final class RestrictionMetabox implements Registrable {
 		$chosen = array();
 
 		foreach ( $this->assignments->for_resource( ProtectedResource::post( $post_id ) ) as $assignment ) {
-			$subject = $assignment->subject();
+			$value = $this->codec->encode( $assignment->subject() );
 
-			if ( Subject::AUTHENTICATED === $subject->type() ) {
-				$chosen[] = 'authenticated';
-
-				continue;
-			}
-
-			if ( Subject::ROLE === $subject->type() ) {
-				$chosen[] = 'role:' . $subject->id();
+			if ( '' !== $value ) {
+				$chosen[] = $value;
 			}
 		}
 
 		return $chosen;
-	}
-
-	/**
-	 * Turn a checkbox value into a subject.
-	 *
-	 * @param string $value The posted value.
-	 * @return Subject|null
-	 */
-	private function subject_from( string $value ): ?Subject {
-		if ( 'authenticated' === $value ) {
-			return Subject::authenticated();
-		}
-
-		if ( 0 === strpos( $value, 'role:' ) ) {
-			$role = sanitize_key( substr( $value, 5 ) );
-
-			return '' !== $role && null !== get_role( $role ) ? Subject::role( $role ) : null;
-		}
-
-		return null;
 	}
 }

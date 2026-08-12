@@ -14,6 +14,7 @@ use OxyArea\Access\AccessResolverInterface;
 use OxyArea\Access\AssignmentRepositoryInterface;
 use OxyArea\Access\AudienceProviderInterface;
 use OxyArea\Access\AudienceResolver;
+use OxyArea\Access\SubjectCodec;
 use OxyArea\Access\HookedAccessResolver;
 use OxyArea\Admin\DashboardPreviewScreen;
 use OxyArea\Admin\Menu;
@@ -96,6 +97,15 @@ final class Plugin {
 	 * Service identifier of the audience resolver.
 	 */
 	public const AUDIENCE = 'access.audience';
+
+	/**
+	 * Subjects, to and from the strings a form field carries.
+	 *
+	 * Shared by the three admin surfaces that let somebody name an audience, and
+	 * the seam an add-on extends to add a kind of subject the free plugin has
+	 * never heard of.
+	 */
+	public const SUBJECT_CODEC = 'access.subject_codec';
 
 	/**
 	 * Service identifier of the access resolver.
@@ -349,6 +359,11 @@ final class Plugin {
 		);
 
 		$container->set(
+			self::SUBJECT_CODEC,
+			static fn (): SubjectCodec => new SubjectCodec()
+		);
+
+		$container->set(
 			self::AUDIENCE,
 			static function (): AudienceResolver {
 				$providers = array( new RoleAudienceProvider() );
@@ -517,7 +532,8 @@ final class Plugin {
 		$container->set(
 			self::DASHBOARD_AUDIENCE,
 			static fn ( Container $c ): AudienceMetabox => new AudienceMetabox(
-				$c->get_typed( self::DASHBOARDS, DashboardRepository::class )
+				$c->get_typed( self::DASHBOARDS, DashboardRepository::class ),
+				$c->get_typed( self::SUBJECT_CODEC, SubjectCodec::class )
 			)
 		);
 
@@ -565,7 +581,8 @@ final class Plugin {
 				self::REDIRECTS_SCREEN,
 				static fn ( Container $c ): RedirectsScreen => new RedirectsScreen(
 					$c->get_typed( self::REDIRECT_RULES, RuleRepositoryInterface::class ),
-					$c->get_typed( self::REDIRECTS, RedirectService::class )
+					$c->get_typed( self::REDIRECTS, RedirectService::class ),
+					$c->get_typed( self::SUBJECT_CODEC, SubjectCodec::class )
 				)
 			);
 
@@ -573,7 +590,8 @@ final class Plugin {
 				self::RESTRICTION_METABOX,
 				static fn ( Container $c ): RestrictionMetabox => new RestrictionMetabox(
 					$c->get_typed( self::ASSIGNMENTS, AssignmentRepositoryInterface::class ),
-					$c->get_typed( self::RESTRICTIONS, Restrictions::class )
+					$c->get_typed( self::RESTRICTIONS, Restrictions::class ),
+					$c->get_typed( self::SUBJECT_CODEC, SubjectCodec::class )
 				)
 			);
 
