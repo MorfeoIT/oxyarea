@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxyArea;
 
 use OxyArea\Access\AccessResolver;
+use OxyArea\Access\AccessResolverInterface;
 use OxyArea\Access\AssignmentRepositoryInterface;
 use OxyArea\Access\AudienceProviderInterface;
 use OxyArea\Access\AudienceResolver;
@@ -17,6 +18,7 @@ use OxyArea\Access\HookedAccessResolver;
 use OxyArea\Admin\DashboardPreviewScreen;
 use OxyArea\Admin\Menu;
 use OxyArea\Admin\RedirectsScreen;
+use OxyArea\Admin\RestrictionMetabox;
 use OxyArea\Admin\RolesScreen;
 use OxyArea\Auth\FormController;
 use OxyArea\Auth\FormErrors;
@@ -29,6 +31,9 @@ use OxyArea\Auth\ProfileForm;
 use OxyArea\Auth\ResetPasswordForm;
 use OxyArea\Blocks\DashboardBlocks;
 use OxyArea\Blocks\Registrar;
+use OxyArea\Content\ContentGuard;
+use OxyArea\Content\QueryGuard;
+use OxyArea\Content\Restrictions;
 use OxyArea\Dashboard\AudienceMetabox;
 use OxyArea\Dashboard\DashboardPostType;
 use OxyArea\Dashboard\DashboardRenderer;
@@ -174,6 +179,26 @@ final class Plugin {
 	 * Service identifier of the redirects screen.
 	 */
 	public const REDIRECTS_SCREEN = 'admin.redirects';
+
+	/**
+	 * Service identifier of the restriction lookup.
+	 */
+	public const RESTRICTIONS = 'content.restrictions';
+
+	/**
+	 * Service identifier of the guard on a single page.
+	 */
+	public const CONTENT_GUARD = 'content.guard';
+
+	/**
+	 * Service identifier of the guard on listings, feeds, REST and the sitemap.
+	 */
+	public const QUERY_GUARD = 'content.query-guard';
+
+	/**
+	 * Service identifier of the restriction metabox.
+	 */
+	public const RESTRICTION_METABOX = 'admin.restriction';
 
 	/**
 	 * Service identifier of the dashboard post type.
@@ -417,6 +442,31 @@ final class Plugin {
 		);
 
 		$container->set(
+			self::RESTRICTIONS,
+			static fn ( Container $c ): Restrictions => new Restrictions(
+				$c->get_typed( self::ASSIGNMENTS, AssignmentRepositoryInterface::class )
+			)
+		);
+
+		$container->set(
+			self::CONTENT_GUARD,
+			static fn ( Container $c ): ContentGuard => new ContentGuard(
+				$c->get_typed( self::ACCESS, AccessResolverInterface::class ),
+				$c->get_typed( self::RESTRICTIONS, Restrictions::class ),
+				$c->get_typed( self::SETTINGS, Settings::class ),
+				$c->get_typed( self::TEMPLATES, Templates::class )
+			)
+		);
+
+		$container->set(
+			self::QUERY_GUARD,
+			static fn ( Container $c ): QueryGuard => new QueryGuard(
+				$c->get_typed( self::ACCESS, AccessResolverInterface::class ),
+				$c->get_typed( self::RESTRICTIONS, Restrictions::class )
+			)
+		);
+
+		$container->set(
 			self::DASHBOARD_POST_TYPE,
 			static fn (): DashboardPostType => new DashboardPostType()
 		);
@@ -492,6 +542,14 @@ final class Plugin {
 				static fn ( Container $c ): RedirectsScreen => new RedirectsScreen(
 					$c->get_typed( self::REDIRECT_RULES, RuleRepositoryInterface::class ),
 					$c->get_typed( self::REDIRECTS, RedirectService::class )
+				)
+			);
+
+			$container->set(
+				self::RESTRICTION_METABOX,
+				static fn ( Container $c ): RestrictionMetabox => new RestrictionMetabox(
+					$c->get_typed( self::ASSIGNMENTS, AssignmentRepositoryInterface::class ),
+					$c->get_typed( self::RESTRICTIONS, Restrictions::class )
 				)
 			);
 

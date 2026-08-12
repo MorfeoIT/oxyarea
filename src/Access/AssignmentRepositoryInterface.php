@@ -41,4 +41,30 @@ interface AssignmentRepositoryInterface {
 	 * @return void
 	 */
 	public function replace_for_resource( ResourceInterface $target, array $assignments ): void;
+
+	/**
+	 * Load the rules for many resources at once.
+	 *
+	 * A listing asks about every post on the page. Asking one at a time is one
+	 * query per row, which is how a plugin turns a search results page into a
+	 * slow search results page. Implementations warm whatever cache
+	 * for_resource() reads from, so the calls that follow cost nothing.
+	 *
+	 * @param string    $type The resource type.
+	 * @param list<int> $ids  The resource identifiers.
+	 * @return void
+	 */
+	public function warm( string $type, array $ids ): void;
+
+	/**
+	 * Every resource of a type that has any rule attached to it at all.
+	 *
+	 * Answers "which of these is restricted", which is a different question from
+	 * "may this person see it" and has to be asked first: a post nobody has said
+	 * anything about is not private, and the resolver would refuse it.
+	 *
+	 * @param string $type The resource type.
+	 * @return list<int>
+	 */
+	public function restricted_ids( string $type ): array;
 }

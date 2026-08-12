@@ -152,6 +152,10 @@ final class AssignmentRepository implements AssignmentRepositoryInterface {
 		}
 
 		wp_cache_delete( $this->cache_key( $target ), self::CACHE_GROUP );
+
+		// The list of what is restricted has just changed shape: a resource may
+		// have gained its first rule or lost its last.
+		wp_cache_delete( 'restricted_' . $target->get_type(), self::CACHE_GROUP );
 	}
 
 	/**
@@ -210,6 +214,111 @@ final class AssignmentRepository implements AssignmentRepositoryInterface {
 	 * @return string
 	 */
 	private function cache_key( ResourceInterface $target ): string {
-		return 'assignments_' . $target->get_type() . '_' . $target->get_id();
+		return $this->key_for( $target->get_type(), $target->get_id() );
+	}
+
+	/**
+	 * Load the rules for many resources in one query.
+	 *
+	 * @param string    $type The resource type.
+	 * @param list<int> $ids  The resource identifiers.
+	 * @return void
+	 */
+	public function warm( string $type, array $ids ): void {
+		global $wpdb;
+
+		$wanted = array();
+
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+
+			if ( $id > 0 && false === wp_cache_get( $this->key_for( $type, $id ), self::CACHE_GROUP ) ) {
+				$wanted[ $id ] = $id;
+			}
+		}
+
+		if ( array() === $wanted ) {
+			return;
+		}
+
+		$table        = Migrator::table( Migrator::TABLE_ASSIGNMENTS );
+		$placeholders = implode( ',', array_fill( 0, count( $wanted ), '%d' ) );
+		$parameters   = array_merge( array( $type ), array_values( $wanted ) );
+
+		// The table name is ours; every value is prepared, including the list of
+		// identifiers, whose placeholders are counted rather than interpolated.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT resource_id, subject_type, subject_id, effect, priority, starts_at, ends_at
+				 FROM {$table}
+				 WHERE resource_type = %s AND resource_id IN ({$placeholders})
+				 ORDER BY priority ASC, id ASC",
+				$parameters
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+		// Every identifier asked about is cached, including the ones with no rows.
+		// Caching only the hits would leave every unrestricted post on the page
+		// asking the database again a moment later.
+		$grouped = array_fill_keys( array_keys( $wanted ), array() );
+
+		foreach ( (array) $rows as $row ) {
+			$row        = (array) $row;
+			$resource   = (int) ( $row['resource_id'] ?? 0 );
+			$assignment = $this->hydrate( $row );
+
+			if ( null !== $assignment && isset( $grouped[ $resource ] ) ) {
+				$grouped[ $resource ][] = $assignment;
+			}
+		}
+
+		foreach ( $grouped as $id => $assignments ) {
+			wp_cache_set( $this->key_for( $type, (int) $id ), $assignments, self::CACHE_GROUP );
+		}
+	}
+
+	/**
+	 * Every resource of a type that anybody has said anything about.
+	 *
+	 * @param string $type The resource type.
+	 * @return list<int>
+	 */
+	public function restricted_ids( string $type ): array {
+		global $wpdb;
+
+		$key    = 'restricted_' . $type;
+		$cached = wp_cache_get( $key, self::CACHE_GROUP );
+
+		if ( is_array( $cached ) ) {
+			return array_values( array_map( 'intval', $cached ) );
+		}
+
+		$table = Migrator::table( Migrator::TABLE_ASSIGNMENTS );
+
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$rows = $wpdb->get_col(
+			$wpdb->prepare( "SELECT DISTINCT resource_id FROM {$table} WHERE resource_type = %s", $type )
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+		$ids = array_values( array_map( 'intval', (array) $rows ) );
+
+		wp_cache_set( $key, $ids, self::CACHE_GROUP );
+
+		return $ids;
+	}
+
+	/**
+	 * The cache key for a resource type and identifier.
+	 *
+	 * @param string $type The resource type.
+	 * @param int    $id   The resource identifier.
+	 * @return string
+	 */
+	private function key_for( string $type, int $id ): string {
+		return 'assignments_' . $type . '_' . $id;
 	}
 }

@@ -55,4 +55,35 @@ final class InMemoryAssignmentRepository implements AssignmentRepositoryInterfac
 	private function key( ResourceInterface $target ): string {
 		return $target->get_type() . ':' . $target->get_id();
 	}
+
+	/**
+	 * Nothing to warm: it is all in memory already.
+	 *
+	 * @param string    $type The resource type.
+	 * @param list<int> $ids  The resource identifiers.
+	 * @return void
+	 */
+	public function warm( string $type, array $ids ): void {
+		unset( $type, $ids );
+	}
+
+	/**
+	 * Every resource of a type that has any rule attached.
+	 *
+	 * @param string $type The resource type.
+	 * @return list<int>
+	 */
+	public function restricted_ids( string $type ): array {
+		$ids = array();
+
+		foreach ( $this->rules as $key => $assignments ) {
+			if ( 0 !== strpos( (string) $key, $type . ':' ) || array() === $assignments ) {
+				continue;
+			}
+
+			$ids[] = (int) substr( (string) $key, strlen( $type ) + 1 );
+		}
+
+		return $ids;
+	}
 }
