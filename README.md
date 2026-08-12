@@ -116,12 +116,20 @@ What the contract covers:
 | Services | `oxyarea_register_services` — add to the container before anything is built |
 | Audiences | `oxyarea_audience_providers` — teach the resolver what a user counts as |
 | Decisions | `oxyarea_access_decision` — observe or override a verdict, with its reasoning |
+| Subjects | `oxyarea_subject_decode` / `_encode` / `_label` — round-trip and name a kind of subject this plugin has never heard of |
+| Screens | `oxyarea_subject_controls` to draw your own control on the three audience screens, `oxyarea_subject_values` to contribute what it collected |
 | Interfaces | `Access\*Interface`, `Dashboard\*Interface`, `Redirect\RuleRepositoryInterface`, `Infrastructure\ClockInterface` |
 | Events | `oxyarea_init`, `oxyarea_role_*`, `oxyarea_user_role_assigned`, `oxyarea_password_reset*`, `oxyarea_content_refused`, `oxyarea_dashboard_rendered`, `oxyarea_*_destination`, `oxyarea_unauthorised_behaviour`, `oxyarea_brand_*` |
 
 The major rises when something there is removed or changes meaning, so an add-on
 built against the old contract refuses to load rather than failing halfway
 through a request. The minor rises when something is added.
+
+`Access\SubjectCodec` is the one parser for the strings a form field carries —
+`authenticated`, `role:editor`, and whatever an add-on adds. The property to
+preserve when extending it is the round trip: a subject that encodes to a value
+which does not decode back to it appears unticked on the screen where it is
+stored, and is lost the next time somebody presses Update.
 
 ## The rules this codebase is held to
 
