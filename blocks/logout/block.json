@@ -1,0 +1,26 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/logout",
+    "title": "Sign out",
+    "category": "widgets",
+    "icon": "unlock",
+    "description": "A sign-out button. Shows nothing at all to somebody who is not signed in.",
+    "keywords": ["logout", "sign out", "private"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false
+    },
+    "attributes": {
+        "label": {
+            "type": "string",
+            "default": ""
+        },
+        "redirectTo": {
+            "type": "string",
+            "default": ""
+        }
+    }
+}

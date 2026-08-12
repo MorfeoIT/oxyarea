@@ -16,12 +16,23 @@ use OxyArea\Access\AudienceResolver;
 use OxyArea\Access\HookedAccessResolver;
 use OxyArea\Admin\Menu;
 use OxyArea\Admin\RolesScreen;
+use OxyArea\Auth\FormController;
+use OxyArea\Auth\FormErrors;
+use OxyArea\Auth\FormHandler;
+use OxyArea\Auth\LoginForm;
+use OxyArea\Auth\LogoutForm;
+use OxyArea\Auth\LostPasswordForm;
+use OxyArea\Auth\PasswordResetLinks;
+use OxyArea\Auth\ProfileForm;
+use OxyArea\Auth\ResetPasswordForm;
+use OxyArea\Blocks\Registrar;
 use OxyArea\Infrastructure\ClockInterface;
 use OxyArea\Infrastructure\Container;
 use OxyArea\Infrastructure\Migrator;
 use OxyArea\Infrastructure\Registrable;
 use OxyArea\Infrastructure\Settings;
 use OxyArea\Infrastructure\SystemClock;
+use OxyArea\Infrastructure\Templates;
 use OxyArea\Persistence\AssignmentRepository;
 use OxyArea\Privacy\PrivacyPolicy;
 use OxyArea\Roles\Capabilities;
@@ -80,6 +91,56 @@ final class Plugin {
 	 * Service identifier of the role manager.
 	 */
 	public const ROLE_MANAGER = 'roles.manager';
+
+	/**
+	 * Service identifier of the template renderer.
+	 */
+	public const TEMPLATES = 'templates';
+
+	/**
+	 * Service identifier of the frontend form error store.
+	 */
+	public const FORM_ERRORS = 'auth.errors';
+
+	/**
+	 * Service identifier of the sign-in form.
+	 */
+	public const FORM_LOGIN = 'auth.login';
+
+	/**
+	 * Service identifier of the sign-out form.
+	 */
+	public const FORM_LOGOUT = 'auth.logout';
+
+	/**
+	 * Service identifier of the forgotten-password form.
+	 */
+	public const FORM_LOST_PASSWORD = 'auth.lost-password';
+
+	/**
+	 * Service identifier of the set-a-new-password form.
+	 */
+	public const FORM_RESET_PASSWORD = 'auth.reset-password';
+
+	/**
+	 * Service identifier of the profile form.
+	 */
+	public const FORM_PROFILE = 'auth.profile';
+
+	/**
+	 * Service identifier of the frontend form router.
+	 */
+	public const FORM_CONTROLLER = 'auth.controller';
+
+	/**
+	 * Service identifier of the password-flow link rewriter.
+	 */
+	public const PASSWORD_RESET_LINKS = 'auth.reset-links';
+
+	/**
+	 * Service identifier of the block and shortcode registrar.
+	 */
+	public const BLOCKS = 'blocks';
 
 	/**
 	 * Service identifier of the roles screen.
@@ -219,6 +280,74 @@ final class Plugin {
 			)
 		);
 
+		$container->set(
+			self::TEMPLATES,
+			static fn (): Templates => new Templates()
+		);
+
+		$container->set(
+			self::FORM_ERRORS,
+			static fn (): FormErrors => new FormErrors()
+		);
+
+		$container->set(
+			self::FORM_LOGIN,
+			static fn ( Container $c ): LoginForm => new LoginForm(
+				$c->get_typed( self::TEMPLATES, Templates::class ),
+				$c->get_typed( self::FORM_ERRORS, FormErrors::class ),
+				$c->get_typed( self::SETTINGS, Settings::class )
+			)
+		);
+
+		$container->set(
+			self::FORM_LOGOUT,
+			static fn ( Container $c ): LogoutForm => new LogoutForm(
+				$c->get_typed( self::TEMPLATES, Templates::class ),
+				$c->get_typed( self::FORM_ERRORS, FormErrors::class )
+			)
+		);
+
+		$container->set(
+			self::FORM_LOST_PASSWORD,
+			static fn ( Container $c ): LostPasswordForm => new LostPasswordForm(
+				$c->get_typed( self::TEMPLATES, Templates::class ),
+				$c->get_typed( self::FORM_ERRORS, FormErrors::class )
+			)
+		);
+
+		$container->set(
+			self::FORM_RESET_PASSWORD,
+			static fn ( Container $c ): ResetPasswordForm => new ResetPasswordForm(
+				$c->get_typed( self::TEMPLATES, Templates::class ),
+				$c->get_typed( self::FORM_ERRORS, FormErrors::class )
+			)
+		);
+
+		$container->set(
+			self::FORM_PROFILE,
+			static fn ( Container $c ): ProfileForm => new ProfileForm(
+				$c->get_typed( self::TEMPLATES, Templates::class ),
+				$c->get_typed( self::FORM_ERRORS, FormErrors::class )
+			)
+		);
+
+		$container->set(
+			self::FORM_CONTROLLER,
+			static fn ( Container $c ): FormController => new FormController( self::forms( $c ) )
+		);
+
+		$container->set(
+			self::BLOCKS,
+			static fn ( Container $c ): Registrar => new Registrar( self::forms( $c ) )
+		);
+
+		$container->set(
+			self::PASSWORD_RESET_LINKS,
+			static fn ( Container $c ): PasswordResetLinks => new PasswordResetLinks(
+				$c->get_typed( self::SETTINGS, Settings::class )
+			)
+		);
+
 		// Admin-only services are not built on a front-end request at all. The
 		// hooks they add would never fire there, and the objects would be built
 		// for nothing on every page view.
@@ -240,5 +369,25 @@ final class Plugin {
 		}
 
 		return $container;
+	}
+
+	/**
+	 * The authentication forms, in the order they were introduced.
+	 *
+	 * The same objects back both the router and the blocks. One instance each, so
+	 * a failure recorded while handling a submission is there when the form
+	 * renders again further down the same request.
+	 *
+	 * @param Container $c The container.
+	 * @return list<FormHandler>
+	 */
+	private static function forms( Container $c ): array {
+		return array(
+			$c->get_typed( self::FORM_LOGIN, LoginForm::class ),
+			$c->get_typed( self::FORM_LOGOUT, LogoutForm::class ),
+			$c->get_typed( self::FORM_LOST_PASSWORD, LostPasswordForm::class ),
+			$c->get_typed( self::FORM_RESET_PASSWORD, ResetPasswordForm::class ),
+			$c->get_typed( self::FORM_PROFILE, ProfileForm::class ),
+		);
 	}
 }

@@ -239,6 +239,133 @@ check( 'one person was moved', 1 === $moved );
 $alice = get_user_by( 'id', $alice->ID );
 check( 'Alice is a subscriber again, not roleless', in_array( 'subscriber', (array) $alice->roles, true ) );
 
+echo "\n== the blocks and shortcodes exist ==\n";
+
+$registry = \WP_Block_Type_Registry::get_instance();
+
+foreach ( array( 'login', 'logout', 'lost-password', 'reset-password', 'profile' ) as $block ) {
+	check( "the oxyarea/{$block} block is registered", $registry->is_registered( 'oxyarea/' . $block ) );
+}
+
+foreach ( array( 'oxyarea_login', 'oxyarea_logout', 'oxyarea_lost_password', 'oxyarea_reset_password', 'oxyarea_profile' ) as $shortcode ) {
+	check( "the [{$shortcode}] shortcode is registered", shortcode_exists( $shortcode ) );
+}
+
+echo "\n== the sign-in form renders ==\n";
+
+wp_set_current_user( 0 );
+
+$login_form = do_shortcode( '[oxyarea_login]' );
+
+check( 'it produces a form', false !== strpos( $login_form, '<form' ) );
+check( 'it carries a nonce', false !== strpos( $login_form, '_wpnonce' ) );
+check( 'it names itself in the action field', false !== strpos( $login_form, 'value="login"' ) );
+check( 'the password field is a password field', false !== strpos( $login_form, 'type="password"' ) );
+check( 'the username field has a label', false !== strpos( $login_form, 'for="oxyarea-user-login"' ) );
+check( 'nothing is echoed unescaped into an attribute', false === strpos( $login_form, 'value="<' ) );
+
+echo "\n== the same answer whoever asks ==\n";
+
+// The point of the lost-password form: a stranger must not be able to use it to
+// find out who has an account here.
+$existing = 'alice';
+$unknown  = 'nobody-with-this-name-exists';
+
+check( 'the account used for the comparison really does exist', false !== get_user_by( 'login', $existing ) );
+check( 'the one it is compared against really does not', false === get_user_by( 'login', $unknown ) );
+
+$lost = new \OxyArea\Auth\LostPasswordForm(
+	new \OxyArea\Infrastructure\Templates(),
+	new \OxyArea\Auth\FormErrors()
+);
+
+$rendered_for_known   = $lost->render();
+$rendered_for_unknown = $lost->render();
+
+check( 'the form itself says nothing either way', $rendered_for_known === $rendered_for_unknown );
+
+echo "\n== a failed sign-in says the same thing every time ==\n";
+
+// A username that exists with the wrong password, and a username that does not
+// exist at all, must be indistinguishable. WordPress's own errors are not: it
+// says "unknown username" for one and "the password you entered is incorrect"
+// for the other, which on a client portal is a way of asking whether somebody is
+// a customer.
+$errors = new \OxyArea\Auth\FormErrors();
+$login  = new \OxyArea\Auth\LoginForm(
+	new \OxyArea\Infrastructure\Templates(),
+	$errors,
+	new \OxyArea\Infrastructure\Settings()
+);
+
+$_SERVER['REQUEST_METHOD'] = 'POST';
+
+$_POST = array(
+	'_wpnonce'      => wp_create_nonce( 'oxyarea_login' ),
+	'user_login'    => $existing,
+	'user_password' => 'definitely-not-the-password',
+);
+$login->handle();
+
+$_POST = array(
+	'_wpnonce'      => wp_create_nonce( 'oxyarea_login' ),
+	'user_login'    => $unknown,
+	'user_password' => 'definitely-not-the-password',
+);
+$login->handle();
+
+$said = $errors->get( 'login' );
+
+check( 'both attempts were refused', 2 === count( $said ) );
+check( 'and refused in identical words', isset( $said[0], $said[1] ) && $said[0] === $said[1] );
+check(
+	'which name neither the account nor the password',
+	isset( $said[0] )
+		&& false === stripos( $said[0], 'unknown' )
+		&& false === stripos( $said[0], 'registered' )
+		&& false === stripos( $said[0], 'email address for' )
+);
+
+echo "\n== a stale nonce is refused ==\n";
+
+$stale  = new \OxyArea\Auth\FormErrors();
+$guarded = new \OxyArea\Auth\LoginForm(
+	new \OxyArea\Infrastructure\Templates(),
+	$stale,
+	new \OxyArea\Infrastructure\Settings()
+);
+
+$_POST = array(
+	'_wpnonce'      => 'not-a-nonce',
+	'user_login'    => $existing,
+	'user_password' => 'definitely-not-the-password',
+);
+$guarded->handle();
+
+check( 'a submission without a good nonce goes no further', 1 === count( $stale->get( 'login' ) ) );
+
+$_POST                     = array();
+$_SERVER['REQUEST_METHOD'] = 'GET';
+
+echo "\n== where a form is allowed to send somebody ==\n";
+
+check(
+	'a path on this site is kept',
+	'/private/' === \OxyArea\Auth\Destination::make_safe( '/private/', '/fallback/' )
+);
+check(
+	'somebody else\'s site is not',
+	'/fallback/' === \OxyArea\Auth\Destination::make_safe( 'https://evil.example/', '/fallback/' )
+);
+check(
+	'nor is a protocol-relative one',
+	'/fallback/' === \OxyArea\Auth\Destination::make_safe( '//evil.example/', '/fallback/' )
+);
+check(
+	'this site by its real name is kept',
+	home_url( '/private/' ) === \OxyArea\Auth\Destination::make_safe( home_url( '/private/' ), '/fallback/' )
+);
+
 echo "\n== cleaning up ==\n";
 
 wp_delete_post( (int) $post_id, true );

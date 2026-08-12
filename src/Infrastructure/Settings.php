@@ -37,6 +37,12 @@ final class Settings {
 			// WordPress to do what it would have done".
 			'default_login_redirect'   => '',
 
+			// The page carrying the login and password blocks. 0 means the site
+			// has not said, and WordPress keeps its own wp-login.php flow, which
+			// is the right default for a plugin that was activated a minute ago
+			// and knows nothing about this site's pages.
+			'login_page'               => 0,
+
 			// What an unauthorised visitor gets by default: login, message, 403
 			// or 404. Sprint F is what reads this.
 			'restricted_behaviour'     => 'login',
@@ -107,6 +113,15 @@ final class Settings {
 
 			if ( is_bool( $default_value ) ) {
 				$clean[ $key ] = (bool) $value;
+
+				continue;
+			}
+
+			if ( is_int( $default_value ) ) {
+				// A post ID that is not a number, or is negative, means "not set"
+				// rather than "guess". absint would turn -3 into 3 and point the
+				// login flow at whatever post that is.
+				$clean[ $key ] = is_numeric( $value ) && (int) $value > 0 ? (int) $value : $default_value;
 
 				continue;
 			}

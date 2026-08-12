@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/reset-password",
+    "title": "Set a new password",
+    "category": "widgets",
+    "icon": "admin-network",
+    "description": "The form somebody lands on from the reset email. Put it on the same page as the sign-in form.",
+    "keywords": ["password", "reset"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false,
+        "multiple": false
+    },
+    "attributes": {}
+}

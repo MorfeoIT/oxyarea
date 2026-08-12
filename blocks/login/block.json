@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/login",
+    "title": "Sign in",
+    "category": "widgets",
+    "icon": "lock",
+    "description": "A sign-in form for the private area. Shows who is signed in when somebody already is.",
+    "keywords": ["login", "sign in", "private", "member"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false,
+        "multiple": false
+    },
+    "attributes": {
+        "label": {
+            "type": "string",
+            "default": ""
+        },
+        "showRemember": {
+            "type": "boolean",
+            "default": true
+        },
+        "showLostPassword": {
+            "type": "boolean",
+            "default": true
+        }
+    }
+}

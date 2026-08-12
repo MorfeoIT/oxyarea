@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/lost-password",
+    "title": "Forgotten password",
+    "category": "widgets",
+    "icon": "email",
+    "description": "Asks for a username or email address and sends a link for setting a new password.",
+    "keywords": ["password", "reset", "forgotten"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false,
+        "multiple": false
+    },
+    "attributes": {
+        "label": {
+            "type": "string",
+            "default": ""
+        }
+    }
+}

@@ -3,6 +3,7 @@
     <description>WordPress coding standards for OxyArea.</description>
 
     <file>src</file>
+    <file>templates</file>
     <file>oxyarea.php</file>
     <file>uninstall.php</file>
 

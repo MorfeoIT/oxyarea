@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/profile",
+    "title": "Profile",
+    "category": "widgets",
+    "icon": "admin-users",
+    "description": "Lets somebody change their own name, email address and password.",
+    "keywords": ["profile", "account", "details"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false,
+        "multiple": false
+    },
+    "attributes": {
+        "label": {
+            "type": "string",
+            "default": ""
+        },
+        "showPassword": {
+            "type": "boolean",
+            "default": true
+        }
+    }
+}
