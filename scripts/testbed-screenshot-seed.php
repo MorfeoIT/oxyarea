@@ -41,11 +41,17 @@ $oxyarea_alice      = get_user_by( 'login', 'alice' );
 $oxyarea_carol      = get_user_by( 'login', 'carol' );
 
 if ( '1' !== (string) getenv( 'OXYAREA_SEED' ) ) {
+	// 'any' means "every post type that is not excluded from search", and the
+	// dashboard post type is excluded from search by design — so 'any' never
+	// finds a dashboard, and a teardown that trusted it left them all behind.
 	$oxyarea_ours = get_posts(
 		array(
-			'post_type'   => 'any',
+			'post_type'   => array_merge(
+				array_values( get_post_types( array( 'public' => true ), 'names' ) ),
+				array( DashboardPostType::POST_TYPE )
+			),
 			'post_status' => 'any',
-			'numberposts' => 100,
+			'numberposts' => 200,
 			'fields'      => 'ids',
 			'meta_key'    => $oxyarea_marker,
 			'meta_value'  => '1',
