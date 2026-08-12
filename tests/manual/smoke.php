@@ -614,6 +614,130 @@ $leftover->flush();
 
 check( 'the test dashboards are gone', array() === $leftover->all() );
 
+echo "\n== restricting a post ==\n";
+
+$restriction_rules = new \OxyArea\Persistence\AssignmentRepository();
+
+/**
+ * The two guards, built fresh so nothing is cached from a previous step.
+ *
+ * @return array{0: \OxyArea\Content\QueryGuard, 1: \OxyArea\Content\Restrictions}
+ */
+function guards(): array {
+	$repository   = new \OxyArea\Persistence\AssignmentRepository();
+	$restrictions = new \OxyArea\Content\Restrictions( $repository );
+
+	$resolver = new \OxyArea\Access\AccessResolver(
+		$repository,
+		new \OxyArea\Access\AudienceResolver( array( new \OxyArea\Roles\RoleAudienceProvider() ) ),
+		new \OxyArea\Roles\CapabilityManagerCheck(),
+		new \OxyArea\Infrastructure\SystemClock()
+	);
+
+	return array( new \OxyArea\Content\QueryGuard( $resolver, $restrictions ), $restrictions );
+}
+
+$public_post  = wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Public thing', 'post_content' => 'open' ) );
+$private_post = wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Private thing', 'post_content' => 'closed' ) );
+
+$restriction_rules->replace_for_resource(
+	\OxyArea\Access\ProtectedResource::post( (int) $private_post ),
+	array( new \OxyArea\Access\Assignment( Subject::role( $agent ) ) )
+);
+
+list( $guard, $restrictions ) = guards();
+
+check( 'the restricted post is known to be restricted', $restrictions->is_restricted( (int) $private_post ) );
+check( 'the public one is not', ! $restrictions->is_restricted( (int) $public_post ) );
+check( 'and the site now restricts something', $restrictions->any() );
+
+echo "\n== listings drop what the reader may not see ==\n";
+
+$both = array( get_post( (int) $public_post ), get_post( (int) $private_post ) );
+
+wp_set_current_user( (int) $carol->ID );
+list( $guard ) = guards();
+$carol_sees = wp_list_pluck( $guard->filter_posts( $both ), 'ID' );
+
+wp_set_current_user( (int) $bob->ID );
+list( $guard ) = guards();
+$bob_sees = wp_list_pluck( $guard->filter_posts( $both ), 'ID' );
+
+wp_set_current_user( 0 );
+list( $guard ) = guards();
+$stranger_sees = wp_list_pluck( $guard->filter_posts( $both ), 'ID' );
+
+check( 'Carol, an agent, sees both', 2 === count( $carol_sees ) );
+check( 'Bob sees only the public one', array( (int) $public_post ) === array_map( 'intval', $bob_sees ) );
+check( 'a stranger sees only the public one', array( (int) $public_post ) === array_map( 'intval', $stranger_sees ) );
+
+echo "\n== the sitemap excludes it whoever is asking ==\n";
+
+list( $guard ) = guards();
+$sitemap_args = $guard->filter_sitemap( array() );
+
+check(
+	'the private post is excluded from the sitemap',
+	isset( $sitemap_args['post__not_in'] ) && in_array( (int) $private_post, array_map( 'intval', $sitemap_args['post__not_in'] ), true )
+);
+check(
+	'and the public one is not',
+	! in_array( (int) $public_post, array_map( 'intval', $sitemap_args['post__not_in'] ), true )
+);
+
+echo "\n== the REST guard, from both sides ==\n";
+
+// The HTTP flow test can only check the refusals: WordPress treats a cookie as
+// authentication for REST only when an X-WP-Nonce comes with it, so curl alone
+// is always an anonymous request. This is where the other half is checked.
+$rest_request = new \WP_REST_Request( 'GET', '/wp/v2/posts/' . (int) $private_post );
+
+wp_set_current_user( 0 );
+list( $guard ) = guards();
+$stranger_answer = $guard->guard_rest( null, null, $rest_request );
+
+wp_set_current_user( (int) $bob->ID );
+list( $guard ) = guards();
+$bob_answer = $guard->guard_rest( null, null, $rest_request );
+
+wp_set_current_user( (int) $carol->ID );
+list( $guard ) = guards();
+$carol_answer = $guard->guard_rest( null, null, $rest_request );
+
+check( 'a stranger is refused', is_wp_error( $stranger_answer ) );
+check( 'with a 404 rather than a 403', is_wp_error( $stranger_answer ) && 404 === $stranger_answer->get_error_data()['status'] );
+check( 'Bob is refused too', is_wp_error( $bob_answer ) );
+check( 'Carol, who may read it, is let through', ! is_wp_error( $carol_answer ) );
+
+$public_request = new \WP_REST_Request( 'GET', '/wp/v2/posts/' . (int) $public_post );
+
+wp_set_current_user( 0 );
+list( $guard ) = guards();
+
+check( 'and an unrestricted post is left alone entirely', ! is_wp_error( $guard->guard_rest( null, null, $public_request ) ) );
+
+echo "\n== a route that is not a single post is not touched ==\n";
+
+wp_set_current_user( 0 );
+list( $guard ) = guards();
+
+foreach ( array( '/wp/v2/posts', '/wp/v2/users/1', '/oxyarea/v1/anything' ) as $other_route ) {
+	check(
+		"the guard ignores {$other_route}",
+		! is_wp_error( $guard->guard_rest( null, null, new \WP_REST_Request( 'GET', $other_route ) ) )
+	);
+}
+
+wp_set_current_user( 0 );
+
+$restriction_rules->replace_for_resource( \OxyArea\Access\ProtectedResource::post( (int) $private_post ), array() );
+wp_delete_post( (int) $public_post, true );
+wp_delete_post( (int) $private_post, true );
+
+list( $guard, $restrictions ) = guards();
+
+check( 'nothing is restricted once the rules are removed', ! $restrictions->any() );
+
 echo "\n== cleaning up ==\n";
 
 wp_delete_post( (int) $post_id, true );

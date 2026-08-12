@@ -66,8 +66,15 @@ if [ -z "${FORM_ID}" ]; then
   FORM_ID=$(wp "post create --post_type=page --post_status=publish --post_title='Sign in' --post_name=oxyarea-restriction-form --porcelain --post_content='<!-- wp:oxyarea/login /-->'")
 fi
 
-ALICE_PASS=$(grep '^alice / ' "${CREDS}" | sed 's|^alice / ||')
-BOB_PASS=$(grep '^bob / ' "${CREDS}" | sed 's|^bob / ||')
+# The credentials file pads the names to line up, so the separator is
+# "<name><spaces>/ <password>" rather than exactly "<name> / ".
+password_for() { sed -n "s|^$1 *[/] *||p" "${CREDS}" | head -1; }
+
+ALICE_PASS=$(password_for alice)
+BOB_PASS=$(password_for bob)
+
+[ -n "${ALICE_PASS}" ] || { echo "STOP: nessuna password per alice in ${CREDS}"; exit 1; }
+[ -n "${BOB_PASS}" ] || { echo "STOP: nessuna password per bob in ${CREDS}"; exit 1; }
 
 echo
 echo "== as a stranger =="
@@ -95,9 +102,15 @@ absent "and gives nothing away in the body" "SECRETMARKER"
 fetch "${SITE}/wp-json/wp/v2/posts" > /dev/null
 absent "the REST collection leaves it out" "quarterly contract"
 
+# WordPress serves no sitemap at all when a site is set to discourage search
+# engines, which the test bed is. Turned on for these two checks only: an
+# unverified sitemap is one of the four leaks the specification refuses a
+# release for, and "we could not test it" is not the same as "it is fine".
+wp "option update blog_public 1" > /dev/null
 fetch "${SITE}/wp-sitemap-posts-post-1.xml" > /dev/null
 present "the sitemap lists the public one" "oxyarea-public-post"
 absent "and not the private one" "oxyarea-private-post"
+wp "option update blog_public 0" > /dev/null
 
 echo
 echo "== as Bob, a customer who may not read it =="
@@ -124,8 +137,12 @@ present "Alice reads the page" "SECRETMARKER"
 fetch "${SITE}/?s=marker" > /dev/null
 present "it appears in her search results" "quarterly contract"
 
-CODE=$(fetch "${SITE}/wp-json/wp/v2/posts/${PRIVATE_ID}")
-[ "${CODE}" = "200" ] && check "and REST gives it to her" yes || check "and REST gives it to her (got ${CODE})" no
+# Alice's REST access is not checked here, and deliberately so: WordPress only
+# treats a cookie as authentication for REST when an X-WP-Nonce header comes
+# with it, so curl with cookies alone is an anonymous request and would be
+# refused whatever this plugin did. The negative cases above are the ones that
+# matter for security and they work without authentication; that an authorised
+# user is let through is checked inside WordPress, in tests/manual/smoke.php.
 
 echo
 echo "== cleaning up =="

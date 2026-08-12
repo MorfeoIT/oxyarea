@@ -77,10 +77,12 @@ final class DashboardPostType implements Registrable {
 				'menu_icon'           => 'dashicons-layout',
 				'map_meta_cap'        => true,
 				'capability_type'     => array( 'oxyarea_dashboard', 'oxyarea_dashboards' ),
+				// Only the primitive capabilities. With map_meta_cap on, WordPress
+				// derives edit_post, read_post and delete_post from these against a
+				// particular post; naming them here turns a meta capability into a
+				// primitive one and produces "map_meta_cap was called incorrectly"
+				// every time something checks one without a post in hand.
 				'capabilities'        => array(
-					'edit_post'              => $capability,
-					'read_post'              => $capability,
-					'delete_post'            => $capability,
 					'edit_posts'             => $capability,
 					'edit_others_posts'      => $capability,
 					'delete_posts'           => $capability,

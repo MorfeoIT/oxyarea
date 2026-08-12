@@ -29,14 +29,27 @@ $oxyarea_admin     = get_user_by( 'login', 'oxysoft' );
 $oxyarea_alice     = get_user_by( 'login', 'alice' );
 $oxyarea_bob       = get_user_by( 'login', 'bob' );
 
-if ( '1' !== (string) getenv( 'OXYAREA_SETUP' ) ) {
-	foreach ( array( 'oxyarea-public-post', 'oxyarea-private-post' ) as $oxyarea_slug ) {
-		$oxyarea_found = get_page_by_path( $oxyarea_slug, OBJECT, 'post' );
+// Marked with a meta key rather than found by slug. WordPress appends a suffix
+// to a duplicate slug, so a run that died before its teardown leaves posts whose
+// slugs no longer match what the next teardown looks for — and the next run then
+// cleans up the previous run's posts while orphaning its own.
+$oxyarea_marker = '_oxyarea_flow_test';
 
-		if ( $oxyarea_found ) {
-			$oxyarea_rules->replace_for_resource( ProtectedResource::post( (int) $oxyarea_found->ID ), array() );
-			wp_delete_post( (int) $oxyarea_found->ID, true );
-		}
+if ( '1' !== (string) getenv( 'OXYAREA_SETUP' ) ) {
+	$oxyarea_ours = get_posts(
+		array(
+			'post_type'   => 'any',
+			'post_status' => 'any',
+			'numberposts' => 100,
+			'fields'      => 'ids',
+			'meta_key'    => $oxyarea_marker,
+			'meta_value'  => '1',
+		)
+	);
+
+	foreach ( (array) $oxyarea_ours as $oxyarea_id ) {
+		$oxyarea_rules->replace_for_resource( ProtectedResource::post( (int) $oxyarea_id ), array() );
+		wp_delete_post( (int) $oxyarea_id, true );
 	}
 
 	$oxyarea_alice->set_role( 'subscriber' );
@@ -77,6 +90,9 @@ $oxyarea_private = wp_insert_post(
 		'post_content' => 'SECRETMARKER the terms of the contract.',
 	)
 );
+
+update_post_meta( (int) $oxyarea_public, $oxyarea_marker, '1' );
+update_post_meta( (int) $oxyarea_private, $oxyarea_marker, '1' );
 
 $oxyarea_rules->replace_for_resource(
 	ProtectedResource::post( (int) $oxyarea_private ),
