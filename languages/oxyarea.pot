@@ -1,0 +1,1242 @@
+# Copyright (C) 2026 Oxysoft
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: OxyArea – Private Client Area & User Portal 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/oxyarea\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-12T14:57:06+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: oxyarea\n"
+
+#. Plugin Name of the plugin
+#: oxyarea.php
+#: src/Infrastructure/Brand.php:83
+msgid "OxyArea – Private Client Area & User Portal"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: oxyarea.php
+msgid "https://oxywp.com/oxyarea/"
+msgstr ""
+
+#. Description of the plugin
+#: oxyarea.php
+msgid "Build a complete private client area in WordPress: frontend login, roles, role dashboards, post-login redirects and content restriction, without assembling five plugins."
+msgstr ""
+
+#. Author of the plugin
+#: oxyarea.php
+msgid "Oxysoft"
+msgstr ""
+
+#. Author URI of the plugin
+#: oxyarea.php
+msgid "https://oxysoft.it/"
+msgstr ""
+
+#. translators: 1: required PHP version, 2: required WordPress version.
+#: oxyarea.php:106
+#, php-format
+msgid "OxyArea needs PHP %1$s or later and WordPress %2$s or later. It has not been started."
+msgstr ""
+
+#: src/Admin/DashboardPreviewScreen.php:71
+msgid "You are not allowed to see this."
+msgstr ""
+
+#: src/Admin/DashboardPreviewScreen.php:87
+#: src/Admin/Menu.php:132
+msgid "Dashboard preview"
+msgstr ""
+
+#: src/Admin/DashboardPreviewScreen.php:88
+msgid "Which dashboard a role resolves to, and how it reads. Nobody is signed in as anybody: the placeholders below are filled with your own details."
+msgstr ""
+
+#: src/Admin/DashboardPreviewScreen.php:92
+msgid "Show me what this role gets:"
+msgstr ""
+
+#: src/Admin/DashboardPreviewScreen.php:101
+msgid "Show me"
+msgstr ""
+
+#. translators: %s: role name.
+#: src/Admin/DashboardPreviewScreen.php:110
+#, php-format
+msgid "Nothing resolves for %s: neither a dashboard of its own nor a site default."
+msgstr ""
+
+#. translators: 1: dashboard title, 2: who it is for.
+#: src/Admin/DashboardPreviewScreen.php:122
+#, php-format
+msgid "%1$s — for %2$s"
+msgstr ""
+
+#: src/Admin/DashboardPreviewScreen.php:127
+msgid "Edit"
+msgstr ""
+
+#: src/Admin/Menu.php:123
+#: src/Admin/Menu.php:124
+#: src/Admin/RolesScreen.php:255
+#: src/Admin/RolesScreen.php:391
+msgid "Roles"
+msgstr ""
+
+#: src/Admin/Menu.php:133
+msgid "Preview"
+msgstr ""
+
+#: src/Admin/Menu.php:141
+#: src/Admin/Menu.php:142
+#: src/Admin/RedirectsScreen.php:89
+msgid "Redirects"
+msgstr ""
+
+#: src/Admin/Menu.php:150
+#: src/Admin/Menu.php:151
+#: src/Admin/SettingsScreen.php:75
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/Menu.php:159
+#: src/Admin/Menu.php:160
+#: src/Admin/ToolsScreen.php:80
+msgid "Tools"
+msgstr ""
+
+#: src/Admin/Menu.php:168
+#: src/Admin/Wizard.php:133
+msgid "Set up a private area"
+msgstr ""
+
+#: src/Admin/Menu.php:169
+msgid "Setup"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:85
+#: src/Admin/RedirectsScreen.php:445
+msgid "You are not allowed to edit redirects."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:90
+msgid "Where people go after signing in, signing out, registering, or setting a new password. A rule about a role always beats a rule about everybody; where two rules are equally specific, the lower priority number wins."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:127
+msgid "A destination has to be a page on this site: either a path beginning with a slash, or a full address on this domain."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:143
+msgid "Rule added."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:161
+msgid "Rule removed."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:181
+#: src/Admin/RolesScreen.php:153
+#: src/Admin/SettingsScreen.php:171
+msgid "Saved."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:193
+#: src/Admin/SettingsScreen.php:97
+msgid "Where people land after signing in"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:194
+msgid "Worked out with the same engine that will decide it for real. A role with two rules shows the one that wins."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:197
+#: src/Admin/RolesScreen.php:260
+msgid "Role"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:198
+msgid "Lands on"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:199
+msgid "Decided by"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:219
+msgid "no rule — the front page"
+msgstr ""
+
+#. translators: %d: how many other rules also matched.
+#: src/Admin/RedirectsScreen.php:227
+#, php-format
+msgid "(%d other rule also matched)"
+msgid_plural "(%d other rules also matched)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/RedirectsScreen.php:252
+msgid "No rules yet. WordPress decides."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:258
+#: src/Admin/RedirectsScreen.php:334
+msgid "Who"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:259
+#: src/Admin/RedirectsScreen.php:348
+msgid "Goes to"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:260
+#: src/Admin/RedirectsScreen.php:353
+msgid "Priority"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:261
+msgid "On"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:262
+#: src/Admin/RedirectsScreen.php:282
+msgid "Remove"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:275
+msgid "Turn off"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:275
+msgid "Turn on"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:321
+msgid "Add a rule"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:327
+msgid "After"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:336
+msgid "Everybody (the fallback)"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:337
+#: src/Admin/RedirectsScreen.php:404
+#: src/Admin/RestrictionMetabox.php:113
+#: src/Dashboard/AudienceMetabox.php:97
+msgid "Anybody signed in"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:338
+#: src/Admin/RedirectsScreen.php:406
+msgid "Anybody not signed in"
+msgstr ""
+
+#. translators: %s: role name.
+#: src/Admin/RedirectsScreen.php:342
+#: src/Admin/RedirectsScreen.php:411
+#: src/Dashboard/AudienceMetabox.php:103
+#, php-format
+msgid "Role: %s"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:350
+msgid "A path on this site, beginning with a slash. Addresses on other domains are refused."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:355
+msgid "Only consulted between rules that are equally specific. Lower goes first, as with a WordPress hook."
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:359
+msgid "Add rule"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:399
+msgid "Everybody"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:426
+msgid "After signing in"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:428
+msgid "After signing out"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:430
+msgid "After registering"
+msgstr ""
+
+#: src/Admin/RedirectsScreen.php:432
+msgid "After setting a new password"
+msgstr ""
+
+#: src/Admin/RestrictionMetabox.php:83
+msgid "Who can see this"
+msgstr ""
+
+#: src/Admin/RestrictionMetabox.php:104
+msgid "Everybody — this page is public"
+msgstr ""
+
+#: src/Admin/RestrictionMetabox.php:107
+msgid "Only these people:"
+msgstr ""
+
+#: src/Admin/RestrictionMetabox.php:126
+msgid "A restricted page is kept out of search, feeds, the REST API and the sitemap as well as being refused when it is opened directly."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:78
+#: src/Admin/RolesScreen.php:537
+msgid "You are not allowed to edit roles."
+msgstr ""
+
+#. translators: %s: role slug.
+#: src/Admin/RolesScreen.php:121
+#, php-format
+msgid "The role \"%s\" has been created. Choose what it may do below."
+msgstr ""
+
+#. translators: 1: role slug, 2: number of users moved, 3: destination role slug.
+#: src/Admin/RolesScreen.php:181
+#, php-format
+msgid "The role \"%1$s\" has been deleted. %2$d person now holds \"%3$s\" instead."
+msgid_plural "The role \"%1$s\" has been deleted. %2$d people now hold \"%3$s\" instead."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: what was typed in the user box.
+#: src/Admin/RolesScreen.php:219
+#, php-format
+msgid "No user found for \"%s\"."
+msgstr ""
+
+#. translators: 1: user login, 2: role slug.
+#: src/Admin/RolesScreen.php:234
+#, php-format
+msgid "%1$s now holds the role \"%2$s\"."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:256
+msgid "A role says what kind of user somebody is. It is not the same as which company they belong to: one role serves every customer, however many companies there are."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:261
+#: src/Admin/RolesScreen.php:315
+msgid "Identifier"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:262
+msgid "People"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:263
+msgid "Created by"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:289
+msgid "WordPress or another plugin"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:306
+msgid "Add a role"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:312
+#: templates/dashboard/profile-summary.php:24
+msgid "Name"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:317
+msgid "Optional. Derived from the name when left empty, and permanent once the role exists."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:320
+msgid "Add role"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:330
+msgid "Give somebody a role"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:335
+#: templates/auth/login.php:39
+#: templates/auth/lost-password.php:32
+msgid "Username or email"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:338
+msgid "This replaces the roles the person currently holds."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:340
+msgid "Assign role"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:356
+msgid "Delete a role"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:357
+msgid "Only roles OxyArea created can be deleted here. Everyone holding the role keeps their account and receives the role you choose instead."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:358
+msgid "Delete this role? The people who hold it keep their accounts."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:375
+msgid "and move its people to"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:377
+msgid "Delete role"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:392
+#: src/Roles/RoleManager.php:354
+msgid "The administrator role is the way back into a site and OxyArea will not change it."
+msgstr ""
+
+#. translators: %s: role name.
+#: src/Admin/RolesScreen.php:400
+#, php-format
+msgid "What %s may do"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:405
+msgid "All roles"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:406
+msgid "Capabilities this role holds from other plugins are not shown and are not touched by saving."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:419
+msgid "Each of these lets somebody take over the site, directly or in one more step. You can only grant what you hold yourself."
+msgstr ""
+
+#: src/Admin/RolesScreen.php:436
+msgid "(you do not hold this yourself)"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:451
+msgid "Save capabilities"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:509
+msgid "Reading"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:511
+msgid "Posts"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:513
+msgid "Pages"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:515
+msgid "Media, comments and categories"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:517
+msgid "Administering the private area"
+msgstr ""
+
+#: src/Admin/RolesScreen.php:519
+msgid "Handing over the site"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:69
+#: src/Admin/SettingsScreen.php:142
+msgid "You are not allowed to change these settings."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:84
+msgid "Sign-in page"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:90
+msgid "— none chosen —"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:94
+msgid "The page carrying the sign-in block. Until this is set, the password reset email sends people to wp-login.php and a refused page has nowhere to send them."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:99
+msgid "Only when no redirect rule matches. A path on this site; anything else is refused."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:102
+msgid "When somebody may not see a page"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:112
+msgid "Only \"not found\" avoids confirming that the page is there at all. Somebody already signed in is shown the message rather than sent to sign in again."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:115
+msgid "The WordPress admin"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:117
+msgid "Send people who cannot write posts back to the front of the site"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:118
+msgid "Staff and anybody who administers OxyArea are unaffected."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:121
+msgid "Deleting the plugin"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:123
+msgid "When OxyArea is deleted, also delete its dashboards, rules and settings"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:124
+msgid "Off by default. Deleting a plugin is often a way of testing something, and it should not cost a site its private area. Switching the plugin off never removes anything, whatever this says."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:168
+msgid "Saved, but the destination was left empty: it has to be a path on this site."
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:192
+msgid "Send them to the sign-in page"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:196
+msgid "Show the page with a short explanation"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:200
+msgid "Refuse, saying the page is not theirs (403)"
+msgstr ""
+
+#: src/Admin/SettingsScreen.php:204
+msgid "Answer as though the page does not exist (404)"
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:84
+msgid "Export"
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:85
+msgid "Settings, redirect rules and dashboards, as one file. It contains no personal data: no users, no accounts, no content anybody has written for a particular person."
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:89
+msgid "Download the file"
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:92
+#: src/Admin/ToolsScreen.php:99
+msgid "Import"
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:93
+msgid "Adds to what is here rather than replacing it. Dashboards arrive as drafts, and anything the file asks for that this site cannot do — a role it does not have, a destination on another domain — is skipped and listed."
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:97
+msgid "The file"
+msgstr ""
+
+#. translators: 1: number of settings, 2: number of redirect rules, 3: number of dashboards.
+#: src/Admin/ToolsScreen.php:154
+#, php-format
+msgid "Imported: %1$d settings, %2$d redirect rules, %3$d dashboards (as drafts)."
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:164
+msgid "Skipped:"
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:187
+#: src/Admin/ToolsScreen.php:197
+msgid "That file did not arrive. Try again."
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:203
+msgid "That file is far larger than a configuration should be, so it has not been read."
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:220
+msgid "You are not allowed to use these tools."
+msgstr ""
+
+#: src/Admin/Wizard.php:116
+msgid "OxyArea can build you a working private area — a role, a sign-in page, a dashboard and the rule that connects them."
+msgstr ""
+
+#: src/Admin/Wizard.php:118
+msgid "Set it up"
+msgstr ""
+
+#: src/Admin/Wizard.php:129
+#: src/Admin/Wizard.php:178
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: src/Admin/Wizard.php:141
+msgid "Everything here can be changed afterwards, and nothing is overwritten: if a role or a page already exists, it is used rather than replaced."
+msgstr ""
+
+#: src/Admin/Wizard.php:148
+msgid "What do you call the people who will sign in?"
+msgstr ""
+
+#: src/Admin/Wizard.php:149
+msgid "Customer"
+msgstr ""
+
+#: src/Admin/Wizard.php:150
+msgid "This becomes a role. One role serves everybody of that kind, however many of them there are."
+msgstr ""
+
+#: src/Admin/Wizard.php:153
+msgid "The sign-in page"
+msgstr ""
+
+#: src/Admin/Wizard.php:154
+#: src/Auth/LoginForm.php:169
+#: templates/content/restricted.php:31
+msgid "Sign in"
+msgstr ""
+
+#: src/Admin/Wizard.php:155
+msgid "A new page carrying the sign-in and forgotten-password blocks."
+msgstr ""
+
+#: src/Admin/Wizard.php:158
+msgid "Their dashboard"
+msgstr ""
+
+#: src/Admin/Wizard.php:159
+msgid "Customer area"
+msgstr ""
+
+#: src/Admin/Wizard.php:160
+msgid "A dashboard for that role, with a greeting and an account summary to start from. It is created as a draft so nothing appears before you have looked at it."
+msgstr ""
+
+#: src/Admin/Wizard.php:164
+msgid "Build it"
+msgstr ""
+
+#. translators: 1: role name, 2: page title, 3: dashboard title.
+#: src/Admin/Wizard.php:212
+#, php-format
+msgid "Built: the role \"%1$s\", the page \"%2$s\", and the draft dashboard \"%3$s\"."
+msgstr ""
+
+#: src/Admin/Wizard.php:299
+msgid "Before you believe it works"
+msgstr ""
+
+#: src/Admin/Wizard.php:300
+msgid "A wizard reporting success has not proved anything. These four take two minutes."
+msgstr ""
+
+#: src/Admin/Wizard.php:302
+msgid "Publish the dashboard: it was created as a draft, and a draft resolves to nothing."
+msgstr ""
+
+#: src/Admin/Wizard.php:303
+msgid "Give somebody the role, on the Roles screen."
+msgstr ""
+
+#: src/Admin/Wizard.php:304
+msgid "Sign in as them, in a private browser window, and check where you land."
+msgstr ""
+
+#: src/Admin/Wizard.php:305
+msgid "Sign out and open the same address again: you should not see it."
+msgstr ""
+
+#: src/Auth/Form.php:99
+msgid "This form has been open too long and could not be submitted safely. Please try again."
+msgstr ""
+
+#: src/Auth/LoginForm.php:185
+#: src/Auth/LoginForm.php:196
+msgid "That username or password is not right."
+msgstr ""
+
+#: src/Auth/LoginForm.php:189
+msgid "Please fill in both your username and your password."
+msgstr ""
+
+#: src/Auth/LogoutForm.php:93
+#: templates/auth/signed-in.php:35
+msgid "Sign out"
+msgstr ""
+
+#: src/Auth/LostPasswordForm.php:56
+msgid "Enter the username or email address you use here."
+msgstr ""
+
+#: src/Auth/LostPasswordForm.php:83
+msgid "Email me a link"
+msgstr ""
+
+#: src/Auth/Notices.php:63
+msgid "If there is an account for that address, an email is on its way with a link to set a new password."
+msgstr ""
+
+#: src/Auth/Notices.php:66
+msgid "Your password has been changed. You can sign in with it now."
+msgstr ""
+
+#: src/Auth/Notices.php:69
+msgid "Your details have been saved."
+msgstr ""
+
+#: src/Auth/Notices.php:72
+msgid "You are signed out."
+msgstr ""
+
+#. translators: %s: the person's display name.
+#: src/Auth/PasswordResetLinks.php:110
+#, php-format
+msgid "Hello %s,"
+msgstr ""
+
+#. translators: %s: the site name.
+#: src/Auth/PasswordResetLinks.php:116
+#, php-format
+msgid "Somebody asked to set a new password for your account on %s."
+msgstr ""
+
+#: src/Auth/PasswordResetLinks.php:120
+msgid "If that was not you, you can ignore this email and nothing will change."
+msgstr ""
+
+#: src/Auth/PasswordResetLinks.php:122
+msgid "To set a new password, open this link:"
+msgstr ""
+
+#: src/Auth/ProfileForm.php:51
+msgid "You need to be signed in to change your details."
+msgstr ""
+
+#: src/Auth/ProfileForm.php:84
+msgid "Enter your current password to change your email address or your password."
+msgstr ""
+
+#: src/Auth/ProfileForm.php:93
+msgid "That does not look like an email address."
+msgstr ""
+
+#: src/Auth/ProfileForm.php:103
+msgid "The two new passwords are not the same."
+msgstr ""
+
+#: src/Auth/ProfileForm.php:151
+msgid "Save changes"
+msgstr ""
+
+#: src/Auth/ResetPasswordForm.php:73
+msgid "Choose a password."
+msgstr ""
+
+#: src/Auth/ResetPasswordForm.php:79
+msgid "The two passwords are not the same."
+msgstr ""
+
+#: src/Auth/ResetPasswordForm.php:173
+#: templates/auth/reset-password.php:30
+msgid "This link cannot be used any more. Ask for a new one and use the most recent email."
+msgstr ""
+
+#: src/Blocks/DashboardBlocks.php:174
+#: assets/js/blocks.js:130
+msgid "Welcome, {{display_name}}."
+msgstr ""
+
+#: src/Content/ContentGuard.php:171
+msgid "You are not allowed to see this page."
+msgstr ""
+
+#: src/Content/ContentGuard.php:172
+msgid "Not allowed"
+msgstr ""
+
+#: src/Content/QueryGuard.php:199
+msgid "Invalid post ID."
+msgstr ""
+
+#: src/Dashboard/AudienceMetabox.php:68
+#: src/Dashboard/AudienceMetabox.php:88
+msgid "Who this dashboard is for"
+msgstr ""
+
+#: src/Dashboard/AudienceMetabox.php:94
+msgid "The site default"
+msgstr ""
+
+#: src/Dashboard/AudienceMetabox.php:110
+msgid "One template serves everybody who holds the role. The site default is what somebody sees when their role has nothing of its own."
+msgstr ""
+
+#: src/Dashboard/AudienceMetabox.php:114
+msgid "Placeholders you can use in the content:"
+msgstr ""
+
+#: src/Dashboard/DashboardPostType.php:63
+msgid "Dashboards"
+msgstr ""
+
+#: src/Dashboard/DashboardPostType.php:64
+msgid "Dashboard"
+msgstr ""
+
+#: src/Dashboard/DashboardPostType.php:65
+msgid "Add a dashboard"
+msgstr ""
+
+#: src/Dashboard/DashboardPostType.php:66
+msgid "Edit dashboard"
+msgstr ""
+
+#: src/Dashboard/DashboardPostType.php:67
+msgid "Search dashboards"
+msgstr ""
+
+#: src/Dashboard/DashboardPostType.php:68
+msgid "No dashboards yet."
+msgstr ""
+
+#. translators: 1: required PHP version, 2: required WordPress version, 3: current PHP version, 4: current WordPress version.
+#: src/Infrastructure/Activator.php:102
+#, php-format
+msgid "OxyArea needs PHP %1$s or later and WordPress %2$s or later. This site runs PHP %3$s and WordPress %4$s."
+msgstr ""
+
+#: src/Infrastructure/Activator.php:109
+msgid "OxyArea could not be activated"
+msgstr ""
+
+#: src/Privacy/PrivacyPolicy.php:48
+msgid "Suggested text for sites running a private client area. Edit it to describe what your own private area actually holds."
+msgstr ""
+
+#: src/Privacy/PrivacyPolicy.php:50
+msgid "This site provides a private area that is only available to signed-in users. To decide what each user may see, the site records which roles a page, dashboard or document is available to, and reads the account you are signed in with. This information stays on this site and is not sent anywhere else."
+msgstr ""
+
+#: src/Privacy/PrivacyPolicy.php:52
+msgid "Signing in, resetting a password and staying signed in use the standard WordPress account and cookie mechanisms, which are described elsewhere in this policy."
+msgstr ""
+
+#: src/Privacy/PrivacyPolicy.php:56
+msgid "OxyArea"
+msgstr ""
+
+#: src/Roles/RoleManager.php:75
+msgid "A role needs a name."
+msgstr ""
+
+#. translators: %s: role slug.
+#: src/Roles/RoleManager.php:84
+#, php-format
+msgid "The role \"%s\" already exists."
+msgstr ""
+
+#. translators: %s: role slug.
+#: src/Roles/RoleManager.php:140
+#, php-format
+msgid "There is no role called \"%s\" to copy."
+msgstr ""
+
+#: src/Roles/RoleManager.php:177
+msgid "That change would remove your own access to the role editor, so it has not been saved."
+msgstr ""
+
+#. translators: %s: role slug.
+#: src/Roles/RoleManager.php:227
+#, php-format
+msgid "The role \"%s\" was not created by OxyArea, so OxyArea will not delete it."
+msgstr ""
+
+#: src/Roles/RoleManager.php:235
+msgid "Choose an existing role for the people who hold this one."
+msgstr ""
+
+#: src/Roles/RoleManager.php:241
+msgid "The people holding this role need a different role to move to."
+msgstr ""
+
+#: src/Roles/RoleManager.php:247
+msgid "That would remove your own access to the role editor, so the role has not been deleted."
+msgstr ""
+
+#: src/Roles/RoleManager.php:311
+msgid "That user no longer exists."
+msgstr ""
+
+#: src/Roles/RoleManager.php:315
+msgid "That role no longer exists."
+msgstr ""
+
+#: src/Roles/RoleManager.php:320
+msgid "Making somebody an administrator needs the ability to promote users."
+msgstr ""
+
+#: src/Roles/RoleManager.php:326
+msgid "This is the only administrator on the site. Give somebody else that role first."
+msgstr ""
+
+#. translators: %s: role slug.
+#: src/Roles/RoleManager.php:364
+#, php-format
+msgid "There is no role called \"%s\"."
+msgstr ""
+
+#: src/Roles/RoleManager.php:467
+msgid "That name leaves nothing usable as a role identifier. Use letters or numbers."
+msgstr ""
+
+#. translators: %s: the event named in the file.
+#: src/Tools/Porter.php:211
+#, php-format
+msgid "A rule for an unknown moment, \"%s\"."
+msgstr ""
+
+#. translators: %s: the destination named in the file.
+#: src/Tools/Porter.php:221
+#, php-format
+msgid "A rule pointing somewhere off this site, \"%s\"."
+msgstr ""
+
+#. translators: %s: the role named in the file.
+#: src/Tools/Porter.php:235
+#, php-format
+msgid "A rule for a role this site does not have, \"%s\"."
+msgstr ""
+
+#: templates/auth/login.php:55
+msgid "Password"
+msgstr ""
+
+#: templates/auth/login.php:70
+msgid "Keep me signed in on this device"
+msgstr ""
+
+#: templates/auth/login.php:81
+msgid "Forgotten your password?"
+msgstr ""
+
+#: templates/auth/lost-password.php:46
+msgid "We will send a link to the address on the account."
+msgstr ""
+
+#: templates/auth/profile.php:33
+msgid "First name"
+msgstr ""
+
+#: templates/auth/profile.php:38
+msgid "Last name"
+msgstr ""
+
+#: templates/auth/profile.php:43
+msgid "Shown as"
+msgstr ""
+
+#: templates/auth/profile.php:48
+#: templates/dashboard/profile-summary.php:27
+msgid "Email address"
+msgstr ""
+
+#: templates/auth/profile.php:54
+msgid "Change your password"
+msgstr ""
+
+#: templates/auth/profile.php:56
+msgid "Leave these empty to keep the password you have."
+msgstr ""
+
+#: templates/auth/profile.php:60
+#: templates/auth/reset-password.php:41
+msgid "New password"
+msgstr ""
+
+#: templates/auth/profile.php:65
+#: templates/auth/reset-password.php:55
+msgid "New password again"
+msgstr ""
+
+#: templates/auth/profile.php:72
+msgid "Your current password"
+msgstr ""
+
+#: templates/auth/profile.php:75
+msgid "Only needed if you are changing your email address or your password."
+msgstr ""
+
+#: templates/auth/reset-password.php:68
+msgid "Set my password"
+msgstr ""
+
+#. translators: %s: the person's display name.
+#: templates/auth/signed-in.php:28
+#, php-format
+msgid "You are signed in as %s."
+msgstr ""
+
+#: templates/auth/signed-out.php:26
+msgid "You need to be signed in to see this."
+msgstr ""
+
+#: templates/content/restricted.php:24
+msgid "This page is private, and it is not one your account has access to."
+msgstr ""
+
+#: templates/content/restricted.php:26
+msgid "This page is private."
+msgstr ""
+
+#: templates/dashboard/none.php:24
+msgid "There is no dashboard for this role yet, and only people who can manage OxyArea are seeing this message."
+msgstr ""
+
+#: templates/dashboard/none.php:27
+msgid "Build one"
+msgstr ""
+
+#: templates/dashboard/profile-summary.php:31
+msgid "Account type"
+msgstr ""
+
+#: assets/js/blocks.js:66
+msgid "A sign-in form appears here. People who are already signed in see who they are signed in as."
+msgstr ""
+
+#: assets/js/blocks.js:71
+msgid "A sign-out button appears here, and nothing at all for visitors who are not signed in."
+msgstr ""
+
+#: assets/js/blocks.js:76
+msgid "A form for asking to set a new password. It gives the same answer whether or not the account exists."
+msgstr ""
+
+#: assets/js/blocks.js:81
+msgid "The form people reach from the reset email. Put it on the same page as the sign-in form."
+msgstr ""
+
+#: assets/js/blocks.js:86
+msgid "People can change their own name, email address and password here."
+msgstr ""
+
+#: assets/js/blocks.js:91
+msgid "The dashboard belonging to whoever is reading. Which one that is depends on their role."
+msgstr ""
+
+#: assets/js/blocks.js:96
+msgid "The reader’s name, email address and account type. Read only."
+msgstr ""
+
+#: assets/js/blocks.js:123
+msgid "Welcome line"
+msgstr ""
+
+#: assets/js/blocks.js:138
+msgid "Placeholders: {{display_name}} {{first_name}} {{last_name}} {{username}} {{user_email}} {{user_id}}"
+msgstr ""
+
+#: blocks/dashboard/block.json
+msgctxt "block title"
+msgid "Private dashboard"
+msgstr ""
+
+#: blocks/dashboard/block.json
+msgctxt "block description"
+msgid "Shows the dashboard belonging to whoever is reading. One template serves everybody who holds a role."
+msgstr ""
+
+#: blocks/dashboard/block.json
+msgctxt "block keyword"
+msgid "dashboard"
+msgstr ""
+
+#: blocks/dashboard/block.json
+#: blocks/login/block.json
+#: blocks/logout/block.json
+msgctxt "block keyword"
+msgid "private"
+msgstr ""
+
+#: blocks/dashboard/block.json
+msgctxt "block keyword"
+msgid "portal"
+msgstr ""
+
+#: blocks/dashboard/block.json
+msgctxt "block keyword"
+msgid "area"
+msgstr ""
+
+#: blocks/login/block.json
+msgctxt "block title"
+msgid "Sign in"
+msgstr ""
+
+#: blocks/login/block.json
+msgctxt "block description"
+msgid "A sign-in form for the private area. Shows who is signed in when somebody already is."
+msgstr ""
+
+#: blocks/login/block.json
+msgctxt "block keyword"
+msgid "login"
+msgstr ""
+
+#: blocks/login/block.json
+msgctxt "block keyword"
+msgid "sign in"
+msgstr ""
+
+#: blocks/login/block.json
+msgctxt "block keyword"
+msgid "member"
+msgstr ""
+
+#: blocks/logout/block.json
+msgctxt "block title"
+msgid "Sign out"
+msgstr ""
+
+#: blocks/logout/block.json
+msgctxt "block description"
+msgid "A sign-out button. Shows nothing at all to somebody who is not signed in."
+msgstr ""
+
+#: blocks/logout/block.json
+msgctxt "block keyword"
+msgid "logout"
+msgstr ""
+
+#: blocks/logout/block.json
+msgctxt "block keyword"
+msgid "sign out"
+msgstr ""
+
+#: blocks/lost-password/block.json
+msgctxt "block title"
+msgid "Forgotten password"
+msgstr ""
+
+#: blocks/lost-password/block.json
+msgctxt "block description"
+msgid "Asks for a username or email address and sends a link for setting a new password."
+msgstr ""
+
+#: blocks/lost-password/block.json
+#: blocks/reset-password/block.json
+msgctxt "block keyword"
+msgid "password"
+msgstr ""
+
+#: blocks/lost-password/block.json
+#: blocks/reset-password/block.json
+msgctxt "block keyword"
+msgid "reset"
+msgstr ""
+
+#: blocks/lost-password/block.json
+msgctxt "block keyword"
+msgid "forgotten"
+msgstr ""
+
+#: blocks/profile-summary/block.json
+msgctxt "block title"
+msgid "Account summary"
+msgstr ""
+
+#: blocks/profile-summary/block.json
+msgctxt "block description"
+msgid "The reader's name, email address and account type, read only."
+msgstr ""
+
+#: blocks/profile-summary/block.json
+#: blocks/profile/block.json
+msgctxt "block keyword"
+msgid "profile"
+msgstr ""
+
+#: blocks/profile-summary/block.json
+#: blocks/profile/block.json
+msgctxt "block keyword"
+msgid "account"
+msgstr ""
+
+#: blocks/profile-summary/block.json
+msgctxt "block keyword"
+msgid "summary"
+msgstr ""
+
+#: blocks/profile/block.json
+msgctxt "block title"
+msgid "Profile"
+msgstr ""
+
+#: blocks/profile/block.json
+msgctxt "block description"
+msgid "Lets somebody change their own name, email address and password."
+msgstr ""
+
+#: blocks/profile/block.json
+msgctxt "block keyword"
+msgid "details"
+msgstr ""
+
+#: blocks/reset-password/block.json
+msgctxt "block title"
+msgid "Set a new password"
+msgstr ""
+
+#: blocks/reset-password/block.json
+msgctxt "block description"
+msgid "The form somebody lands on from the reset email. Put it on the same page as the sign-in form."
+msgstr ""
+
+#: blocks/welcome/block.json
+msgctxt "block title"
+msgid "Welcome line"
+msgstr ""
+
+#: blocks/welcome/block.json
+msgctxt "block description"
+msgid "A line of text with the reader's own details filled in, such as {{display_name}}."
+msgstr ""
+
+#: blocks/welcome/block.json
+msgctxt "block keyword"
+msgid "welcome"
+msgstr ""
+
+#: blocks/welcome/block.json
+msgctxt "block keyword"
+msgid "greeting"
+msgstr ""
+
+#: blocks/welcome/block.json
+msgctxt "block keyword"
+msgid "name"
+msgstr ""

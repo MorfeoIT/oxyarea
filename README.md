@@ -176,14 +176,22 @@ Sprint F complete: content restriction. A page protected by role, refused when
 opened and absent from search, feeds, the REST API, the sitemap and neighbour
 links.
 
-Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
-**Plugin Check reports no errors**, 204 unit tests pass, the 109 checks in
-`tests/manual/smoke.php` pass inside a real installation, and the 48 checks in
-the four flow scripts pass over HTTP — including the release blockers, asked as
-a stranger and then as each of two customers.
+Sprint G complete: the release candidate. Settings, export and import, a setup
+wizard, and 274 translatable strings in `languages/oxyarea.pot`.
 
-Next: Sprint G — the release candidate. The onboarding wizard, the settings
-screen, import and export, accessibility, the readme and the submission report.
+Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
+**Plugin Check reports no errors and one warning**, 225 unit tests pass, the 109
+checks in `tests/manual/smoke.php` pass inside a real installation, and the 48
+checks in the four flow scripts pass over HTTP — including the release blockers,
+asked as a stranger and then as each of two customers.
+
+**Read [`docs/SUBMISSION_READINESS.md`](docs/SUBMISSION_READINESS.md) before
+submitting.** Three things are outstanding and none of them is code: the password
+reset flow has never been run on a site that can send mail, the Name Lock
+checklist has a manual trademark step nobody has done, and the readme has no
+screenshots.
+
+PRO begins only after that, as the master prompt requires.
 
 Still outstanding: the PHPUnit `integration` and `security` suites are empty. The
 manual scripts cover the same ground for now, but they are scripts with a pass
