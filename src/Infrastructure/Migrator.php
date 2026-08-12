@@ -27,12 +27,17 @@ final class Migrator {
 	/**
 	 * The schema version this code expects.
 	 */
-	public const TARGET_VERSION = 1;
+	public const TARGET_VERSION = 2;
 
 	/**
 	 * The assignments table, without the WordPress prefix.
 	 */
 	public const TABLE_ASSIGNMENTS = 'oxyarea_assignments';
+
+	/**
+	 * The redirect rules table, without the WordPress prefix.
+	 */
+	public const TABLE_REDIRECT_RULES = 'oxyarea_redirect_rules';
 
 	/**
 	 * Whether the stored schema is behind the code.
@@ -99,6 +104,9 @@ final class Migrator {
 			1 => function (): void {
 				$this->create_assignments_table();
 			},
+			2 => function (): void {
+				$this->create_redirect_rules_table();
+			},
 		);
 	}
 
@@ -140,6 +148,45 @@ final class Migrator {
 			KEY resource (resource_type,resource_id),
 			KEY subject (subject_type,subject_id),
 			KEY window_end (ends_at)
+		) {$collate};";
+
+		dbDelta( $sql );
+	}
+
+	/**
+	 * Where people go after signing in, out, registering or resetting.
+	 *
+	 * A table rather than an option because the rules are queried on the hottest
+	 * path there is — every sign-in — and because a site with a rule per role
+	 * across four events is a list somebody will want to sort and page through
+	 * long before it is large.
+	 *
+	 * An empty subject_type is the event's fallback: the rule that matches
+	 * whoever is left. It is stored as a row like any other so that priority and
+	 * enabling work on it too.
+	 *
+	 * @return void
+	 */
+	private function create_redirect_rules_table(): void {
+		global $wpdb;
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		$table   = self::table( self::TABLE_REDIRECT_RULES );
+		$collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE {$table} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			event varchar(20) NOT NULL,
+			subject_type varchar(32) NOT NULL DEFAULT '',
+			subject_id varchar(191) NOT NULL DEFAULT '',
+			destination text NOT NULL,
+			priority smallint(5) NOT NULL DEFAULT 10,
+			enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+			PRIMARY KEY  (id),
+			KEY event (event,enabled),
+			KEY subject (subject_type,subject_id)
 		) {$collate};";
 
 		dbDelta( $sql );

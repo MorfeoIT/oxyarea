@@ -46,11 +46,31 @@ final class LogoutForm extends Form {
 			return;
 		}
 
-		$destination = Destination::requested( home_url( '/' ) );
+		$home    = home_url( '/' );
+		$user_id = get_current_user_id();
+
+		// Decided while there is still somebody to decide about. Asking after
+		// wp_logout() would match every rule against "not signed in" and make a
+		// sign-out rule per role impossible to write.
+		$destination = Destination::requested( '' );
+
+		if ( '' === $destination ) {
+			/**
+			 * Filters where somebody lands after signing out through OxyArea.
+			 *
+			 * @since 0.1.0
+			 *
+			 * @param string $destination Where they are about to go.
+			 * @param int    $user_id     Who is signing out.
+			 */
+			$destination = (string) apply_filters( 'oxyarea_logout_destination', $home, $user_id );
+		}
 
 		wp_logout();
 
-		wp_safe_redirect( Notices::url( $destination, Notices::SIGNED_OUT ) );
+		wp_safe_redirect(
+			Notices::url( Destination::make_safe( $destination, $home ), Notices::SIGNED_OUT )
+		);
 
 		exit;
 	}

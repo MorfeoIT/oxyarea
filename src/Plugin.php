@@ -15,6 +15,7 @@ use OxyArea\Access\AudienceProviderInterface;
 use OxyArea\Access\AudienceResolver;
 use OxyArea\Access\HookedAccessResolver;
 use OxyArea\Admin\Menu;
+use OxyArea\Admin\RedirectsScreen;
 use OxyArea\Admin\RolesScreen;
 use OxyArea\Auth\FormController;
 use OxyArea\Auth\FormErrors;
@@ -34,7 +35,11 @@ use OxyArea\Infrastructure\Settings;
 use OxyArea\Infrastructure\SystemClock;
 use OxyArea\Infrastructure\Templates;
 use OxyArea\Persistence\AssignmentRepository;
+use OxyArea\Persistence\RedirectRuleRepository;
 use OxyArea\Privacy\PrivacyPolicy;
+use OxyArea\Redirect\RedirectResolver;
+use OxyArea\Redirect\RedirectService;
+use OxyArea\Redirect\RuleRepositoryInterface;
 use OxyArea\Roles\Capabilities;
 use OxyArea\Roles\CapabilityManagerCheck;
 use OxyArea\Roles\ManagedRoles;
@@ -141,6 +146,26 @@ final class Plugin {
 	 * Service identifier of the block and shortcode registrar.
 	 */
 	public const BLOCKS = 'blocks';
+
+	/**
+	 * Service identifier of the redirect rule store.
+	 */
+	public const REDIRECT_RULES = 'redirect.rules';
+
+	/**
+	 * Service identifier of the redirect engine.
+	 */
+	public const REDIRECT_RESOLVER = 'redirect.resolver';
+
+	/**
+	 * Service identifier of the service that wires the engine to WordPress.
+	 */
+	public const REDIRECTS = 'redirect.service';
+
+	/**
+	 * Service identifier of the redirects screen.
+	 */
+	public const REDIRECTS_SCREEN = 'admin.redirects';
 
 	/**
 	 * Service identifier of the roles screen.
@@ -348,6 +373,26 @@ final class Plugin {
 			)
 		);
 
+		$container->set(
+			self::REDIRECT_RULES,
+			static fn (): RedirectRuleRepository => new RedirectRuleRepository()
+		);
+
+		$container->set(
+			self::REDIRECT_RESOLVER,
+			static fn (): RedirectResolver => new RedirectResolver()
+		);
+
+		$container->set(
+			self::REDIRECTS,
+			static fn ( Container $c ): RedirectService => new RedirectService(
+				$c->get_typed( self::REDIRECT_RESOLVER, RedirectResolver::class ),
+				$c->get_typed( self::REDIRECT_RULES, RuleRepositoryInterface::class ),
+				$c->get_typed( self::AUDIENCE, AudienceResolver::class ),
+				$c->get_typed( self::SETTINGS, Settings::class )
+			)
+		);
+
 		// Admin-only services are not built on a front-end request at all. The
 		// hooks they add would never fire there, and the objects would be built
 		// for nothing on every page view.
@@ -361,9 +406,18 @@ final class Plugin {
 			);
 
 			$container->set(
+				self::REDIRECTS_SCREEN,
+				static fn ( Container $c ): RedirectsScreen => new RedirectsScreen(
+					$c->get_typed( self::REDIRECT_RULES, RuleRepositoryInterface::class ),
+					$c->get_typed( self::REDIRECTS, RedirectService::class )
+				)
+			);
+
+			$container->set(
 				self::MENU,
 				static fn ( Container $c ): Menu => new Menu(
-					$c->get_typed( self::ROLES_SCREEN, RolesScreen::class )
+					$c->get_typed( self::ROLES_SCREEN, RolesScreen::class ),
+					$c->get_typed( self::REDIRECTS_SCREEN, RedirectsScreen::class )
 				)
 			);
 		}

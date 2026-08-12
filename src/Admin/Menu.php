@@ -30,12 +30,21 @@ final class Menu implements Registrable {
 	private RolesScreen $roles;
 
 	/**
+	 * The redirects screen.
+	 *
+	 * @var RedirectsScreen
+	 */
+	private RedirectsScreen $redirects;
+
+	/**
 	 * Build the menu.
 	 *
-	 * @param RolesScreen $roles The roles screen.
+	 * @param RolesScreen     $roles     The roles screen.
+	 * @param RedirectsScreen $redirects The redirects screen.
 	 */
-	public function __construct( RolesScreen $roles ) {
-		$this->roles = $roles;
+	public function __construct( RolesScreen $roles, RedirectsScreen $redirects ) {
+		$this->roles     = $roles;
+		$this->redirects = $redirects;
 	}
 
 	/**
@@ -73,6 +82,15 @@ final class Menu implements Registrable {
 			Capabilities::MANAGE_ROLES,
 			Brand::MENU_SLUG,
 			array( $this->roles, 'render' )
+		);
+
+		add_submenu_page(
+			Brand::MENU_SLUG,
+			__( 'Redirects', 'oxyarea' ),
+			__( 'Redirects', 'oxyarea' ),
+			Capabilities::MANAGE_REDIRECTS,
+			RedirectsScreen::SLUG,
+			array( $this->redirects, 'render' )
 		);
 	}
 }

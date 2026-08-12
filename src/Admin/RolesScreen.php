@@ -86,7 +86,7 @@ final class RolesScreen implements Registrable {
 
 		echo '<div class="wrap">';
 
-		$this->notice();
+		Notices::show();
 
 		if ( '' !== $editing && null !== get_role( $editing ) ) {
 			$this->render_editor( $editing );
@@ -114,7 +114,7 @@ final class RolesScreen implements Registrable {
 				get_current_user_id()
 			);
 
-			$this->remember_notice(
+			Notices::remember(
 				'success',
 				sprintf(
 					/* translators: %s: role slug. */
@@ -125,7 +125,7 @@ final class RolesScreen implements Registrable {
 
 			$this->go_back( $slug );
 		} catch ( RoleException $e ) {
-			$this->remember_notice( 'error', $e->getMessage() );
+			Notices::remember( 'error', $e->getMessage() );
 			$this->go_back();
 		}
 	}
@@ -150,10 +150,10 @@ final class RolesScreen implements Registrable {
 		try {
 			$this->roles->update_capabilities( $slug, $granted, get_current_user_id() );
 
-			$this->remember_notice( 'success', esc_html__( 'Saved.', 'oxyarea' ) );
+			Notices::remember( 'success', esc_html__( 'Saved.', 'oxyarea' ) );
 			$this->go_back( $slug );
 		} catch ( RoleException $e ) {
-			$this->remember_notice( 'error', $e->getMessage() );
+			Notices::remember( 'error', $e->getMessage() );
 			$this->go_back( $slug );
 		}
 	}
@@ -173,7 +173,7 @@ final class RolesScreen implements Registrable {
 		try {
 			$moved = $this->roles->delete( $slug, $reassign_to, get_current_user_id() );
 
-			$this->remember_notice(
+			Notices::remember(
 				'success',
 				sprintf(
 					esc_html(
@@ -191,7 +191,7 @@ final class RolesScreen implements Registrable {
 				)
 			);
 		} catch ( RoleException $e ) {
-			$this->remember_notice( 'error', $e->getMessage() );
+			Notices::remember( 'error', $e->getMessage() );
 		}
 
 		$this->go_back();
@@ -212,7 +212,7 @@ final class RolesScreen implements Registrable {
 		$user = is_email( $login ) ? get_user_by( 'email', $login ) : get_user_by( 'login', $login );
 
 		if ( false === $user ) {
-			$this->remember_notice(
+			Notices::remember(
 				'error',
 				sprintf(
 					/* translators: %s: what was typed in the user box. */
@@ -227,7 +227,7 @@ final class RolesScreen implements Registrable {
 		try {
 			$this->roles->assign_user( (int) $user->ID, $slug, get_current_user_id() );
 
-			$this->remember_notice(
+			Notices::remember(
 				'success',
 				sprintf(
 					/* translators: 1: user login, 2: role slug. */
@@ -237,7 +237,7 @@ final class RolesScreen implements Registrable {
 				)
 			);
 		} catch ( RoleException $e ) {
-			$this->remember_notice( 'error', $e->getMessage() );
+			Notices::remember( 'error', $e->getMessage() );
 		}
 
 		$this->go_back();
@@ -536,60 +536,6 @@ final class RolesScreen implements Registrable {
 		if ( ! current_user_can( Capabilities::MANAGE_ROLES ) ) {
 			wp_die( esc_html__( 'You are not allowed to edit roles.', 'oxyarea' ), '', array( 'response' => 403 ) );
 		}
-	}
-
-	/**
-	 * Keep a message for the screen the browser is about to land on.
-	 *
-	 * Held for the user rather than passed through the URL: a message in a query
-	 * string is a message an attacker can choose.
-	 *
-	 * The message must arrive **already escaped for HTML**, because that is how
-	 * the role manager's messages arrive and mixing the two conventions is how a
-	 * screen ends up either double-escaping or printing something raw that it
-	 * should not have.
-	 *
-	 * @param string $type    'success' or 'error'.
-	 * @param string $message What to say, escaped.
-	 * @return void
-	 */
-	private function remember_notice( string $type, string $message ): void {
-		set_transient(
-			'oxyarea_notice_' . get_current_user_id(),
-			array(
-				'type'    => 'error' === $type ? 'error' : 'success',
-				'message' => $message,
-			),
-			MINUTE_IN_SECONDS
-		);
-	}
-
-	/**
-	 * Show and forget the held message.
-	 *
-	 * @return void
-	 */
-	private function notice(): void {
-		$key    = 'oxyarea_notice_' . get_current_user_id();
-		$notice = get_transient( $key );
-
-		if ( ! is_array( $notice ) || ! isset( $notice['message'] ) ) {
-			return;
-		}
-
-		delete_transient( $key );
-
-		// The message arrives already escaped: every caller of remember_notice()
-		// passes esc_html__() text with esc_html() values interpolated into it,
-		// and the role manager throws the same way. Escaping it a second time
-		// here is what would put &quot; on somebody's screen where they wrote a
-		// quotation mark.
-		printf(
-			'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
-			'error' === ( $notice['type'] ?? '' ) ? 'error' : 'success',
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by every caller; see above.
-			(string) $notice['message']
-		);
 	}
 
 	/**

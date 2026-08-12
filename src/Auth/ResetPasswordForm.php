@@ -92,7 +92,25 @@ final class ResetPasswordForm extends Form {
 		 */
 		do_action( 'oxyarea_password_reset', $user );
 
-		wp_safe_redirect( Notices::url( $this->current_url(), Notices::PASSWORD_CHANGED ) );
+		$here = $this->current_url();
+
+		/**
+		 * Filters where somebody lands after setting a new password.
+		 *
+		 * Staying on the page, with a confirmation, is the default: they are not
+		 * signed in, and moving them somewhere else without saying so is how a
+		 * person ends up unsure whether it worked.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param string $destination Where they are about to go.
+		 * @param int    $user_id     Whose password it was.
+		 */
+		$destination = (string) apply_filters( 'oxyarea_password_reset_destination', $here, (int) $user->ID );
+
+		wp_safe_redirect(
+			Notices::url( Destination::make_safe( $destination, $here ), Notices::PASSWORD_CHANGED )
+		);
 
 		exit;
 	}
