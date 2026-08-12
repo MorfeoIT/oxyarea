@@ -12,6 +12,14 @@ namespace OxyArea\Access;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
+/*
+ * The Access layer contains no WordPress call by design: that is what makes the
+ * authorisation rules testable without an installation, and esc_html() does not
+ * exist here. The message below carries a stored effect value, which comes from
+ * this plugin's own column and cannot contain markup.
+ */
+// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
 /**
  * A subject, an effect, and optionally a period during which it counts.
  *

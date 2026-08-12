@@ -8,7 +8,7 @@ Stable tag: 0.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A private client area in WordPress, without assembling five plugins: frontend login, roles, role dashboards, post-login redirects and content restriction.
+Private client areas for WordPress: frontend login, roles, role dashboards, login redirects and content restriction.
 
 == Description ==
 

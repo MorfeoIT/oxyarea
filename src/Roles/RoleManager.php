@@ -72,7 +72,7 @@ final class RoleManager {
 		$display_name = trim( wp_strip_all_tags( $display_name ) );
 
 		if ( '' === $display_name ) {
-			throw new RoleException( __( 'A role needs a name.', 'oxyarea' ) );
+			throw new RoleException( esc_html__( 'A role needs a name.', 'oxyarea' ) );
 		}
 
 		$slug = $this->normalise_slug( '' !== trim( $slug ) ? $slug : $display_name );
@@ -81,8 +81,8 @@ final class RoleManager {
 			throw new RoleException(
 				sprintf(
 					/* translators: %s: role slug. */
-					__( 'The role "%s" already exists.', 'oxyarea' ),
-					$slug
+					esc_html__( 'The role "%s" already exists.', 'oxyarea' ),
+					esc_html( $slug )
 				)
 			);
 		}
@@ -137,8 +137,8 @@ final class RoleManager {
 			throw new RoleException(
 				sprintf(
 					/* translators: %s: role slug. */
-					__( 'There is no role called "%s" to copy.', 'oxyarea' ),
-					$source_slug
+					esc_html__( 'There is no role called "%s" to copy.', 'oxyarea' ),
+					esc_html( $source_slug )
 				)
 			);
 		}
@@ -174,7 +174,7 @@ final class RoleManager {
 
 		if ( $this->would_lock_out( $acting_user_id, $slug, $granted ) ) {
 			throw new RoleException(
-				__( 'That change would remove your own access to the role editor, so it has not been saved.', 'oxyarea' )
+				esc_html__( 'That change would remove your own access to the role editor, so it has not been saved.', 'oxyarea' )
 			);
 		}
 
@@ -224,27 +224,27 @@ final class RoleManager {
 			throw new RoleException(
 				sprintf(
 					/* translators: %s: role slug. */
-					__( 'The role "%s" was not created by OxyArea, so OxyArea will not delete it.', 'oxyarea' ),
-					$slug
+					esc_html__( 'The role "%s" was not created by OxyArea, so OxyArea will not delete it.', 'oxyarea' ),
+					esc_html( $slug )
 				)
 			);
 		}
 
 		if ( null === get_role( $reassign_to ) ) {
 			throw new RoleException(
-				__( 'Choose an existing role for the people who hold this one.', 'oxyarea' )
+				esc_html__( 'Choose an existing role for the people who hold this one.', 'oxyarea' )
 			);
 		}
 
 		if ( $reassign_to === $slug ) {
 			throw new RoleException(
-				__( 'The people holding this role need a different role to move to.', 'oxyarea' )
+				esc_html__( 'The people holding this role need a different role to move to.', 'oxyarea' )
 			);
 		}
 
 		if ( $this->would_lock_out( $acting_user_id, $slug, array() ) ) {
 			throw new RoleException(
-				__( 'That would remove your own access to the role editor, so the role has not been deleted.', 'oxyarea' )
+				esc_html__( 'That would remove your own access to the role editor, so the role has not been deleted.', 'oxyarea' )
 			);
 		}
 
@@ -308,22 +308,22 @@ final class RoleManager {
 		$user = get_userdata( $user_id );
 
 		if ( false === $user ) {
-			throw new RoleException( __( 'That user no longer exists.', 'oxyarea' ) );
+			throw new RoleException( esc_html__( 'That user no longer exists.', 'oxyarea' ) );
 		}
 
 		if ( null === get_role( $slug ) ) {
-			throw new RoleException( __( 'That role no longer exists.', 'oxyarea' ) );
+			throw new RoleException( esc_html__( 'That role no longer exists.', 'oxyarea' ) );
 		}
 
 		if ( 'administrator' === $slug && ! user_can( $acting_user_id, 'promote_users' ) ) {
 			throw new RoleException(
-				__( 'Making somebody an administrator needs the ability to promote users.', 'oxyarea' )
+				esc_html__( 'Making somebody an administrator needs the ability to promote users.', 'oxyarea' )
 			);
 		}
 
 		if ( 'administrator' !== $slug && $this->is_last_administrator( $user_id ) ) {
 			throw new RoleException(
-				__( 'This is the only administrator on the site. Give somebody else that role first.', 'oxyarea' )
+				esc_html__( 'This is the only administrator on the site. Give somebody else that role first.', 'oxyarea' )
 			);
 		}
 
@@ -351,7 +351,7 @@ final class RoleManager {
 	private function editable_role( string $slug ) {
 		if ( in_array( $slug, self::PROTECTED_ROLES, true ) ) {
 			throw new RoleException(
-				__( 'The administrator role is the way back into a site and OxyArea will not change it.', 'oxyarea' )
+				esc_html__( 'The administrator role is the way back into a site and OxyArea will not change it.', 'oxyarea' )
 			);
 		}
 
@@ -361,8 +361,8 @@ final class RoleManager {
 			throw new RoleException(
 				sprintf(
 					/* translators: %s: role slug. */
-					__( 'There is no role called "%s".', 'oxyarea' ),
-					$slug
+					esc_html__( 'There is no role called "%s".', 'oxyarea' ),
+					esc_html( $slug )
 				)
 			);
 		}
@@ -464,7 +464,7 @@ final class RoleManager {
 
 		if ( '' === $slug ) {
 			throw new RoleException(
-				__( 'That name leaves nothing usable as a role identifier. Use letters or numbers.', 'oxyarea' )
+				esc_html__( 'That name leaves nothing usable as a role identifier. Use letters or numbers.', 'oxyarea' )
 			);
 		}
 

@@ -118,8 +118,8 @@ final class RolesScreen implements Registrable {
 				'success',
 				sprintf(
 					/* translators: %s: role slug. */
-					__( 'The role "%s" has been created. Choose what it may do below.', 'oxyarea' ),
-					$slug
+					esc_html__( 'The role "%s" has been created. Choose what it may do below.', 'oxyarea' ),
+					esc_html( $slug )
 				)
 			);
 
@@ -150,7 +150,7 @@ final class RolesScreen implements Registrable {
 		try {
 			$this->roles->update_capabilities( $slug, $granted, get_current_user_id() );
 
-			$this->remember_notice( 'success', __( 'Saved.', 'oxyarea' ) );
+			$this->remember_notice( 'success', esc_html__( 'Saved.', 'oxyarea' ) );
 			$this->go_back( $slug );
 		} catch ( RoleException $e ) {
 			$this->remember_notice( 'error', $e->getMessage() );
@@ -176,16 +176,18 @@ final class RolesScreen implements Registrable {
 			$this->remember_notice(
 				'success',
 				sprintf(
-					/* translators: 1: role slug, 2: number of users moved, 3: destination role slug. */
-					_n(
-						'The role "%1$s" has been deleted. %2$d person now holds "%3$s" instead.',
-						'The role "%1$s" has been deleted. %2$d people now hold "%3$s" instead.',
-						$moved,
-						'oxyarea'
+					esc_html(
+						/* translators: 1: role slug, 2: number of users moved, 3: destination role slug. */
+						_n(
+							'The role "%1$s" has been deleted. %2$d person now holds "%3$s" instead.',
+							'The role "%1$s" has been deleted. %2$d people now hold "%3$s" instead.',
+							$moved,
+							'oxyarea'
+						)
 					),
-					$slug,
+					esc_html( $slug ),
 					$moved,
-					$reassign_to
+					esc_html( $reassign_to )
 				)
 			);
 		} catch ( RoleException $e ) {
@@ -214,8 +216,8 @@ final class RolesScreen implements Registrable {
 				'error',
 				sprintf(
 					/* translators: %s: what was typed in the user box. */
-					__( 'No user found for "%s".', 'oxyarea' ),
-					$login
+					esc_html__( 'No user found for "%s".', 'oxyarea' ),
+					esc_html( $login )
 				)
 			);
 
@@ -229,9 +231,9 @@ final class RolesScreen implements Registrable {
 				'success',
 				sprintf(
 					/* translators: 1: user login, 2: role slug. */
-					__( '%1$s now holds the role "%2$s".', 'oxyarea' ),
-					$user->user_login,
-					$slug
+					esc_html__( '%1$s now holds the role "%2$s".', 'oxyarea' ),
+					esc_html( $user->user_login ),
+					esc_html( $slug )
 				)
 			);
 		} catch ( RoleException $e ) {
@@ -542,8 +544,13 @@ final class RolesScreen implements Registrable {
 	 * Held for the user rather than passed through the URL: a message in a query
 	 * string is a message an attacker can choose.
 	 *
+	 * The message must arrive **already escaped for HTML**, because that is how
+	 * the role manager's messages arrive and mixing the two conventions is how a
+	 * screen ends up either double-escaping or printing something raw that it
+	 * should not have.
+	 *
 	 * @param string $type    'success' or 'error'.
-	 * @param string $message What to say.
+	 * @param string $message What to say, escaped.
 	 * @return void
 	 */
 	private function remember_notice( string $type, string $message ): void {
@@ -572,10 +579,16 @@ final class RolesScreen implements Registrable {
 
 		delete_transient( $key );
 
+		// The message arrives already escaped: every caller of remember_notice()
+		// passes esc_html__() text with esc_html() values interpolated into it,
+		// and the role manager throws the same way. Escaping it a second time
+		// here is what would put &quot; on somebody's screen where they wrote a
+		// quotation mark.
 		printf(
 			'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
 			'error' === ( $notice['type'] ?? '' ) ? 'error' : 'success',
-			esc_html( (string) $notice['message'] )
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped by every caller; see above.
+			(string) $notice['message']
 		);
 	}
 

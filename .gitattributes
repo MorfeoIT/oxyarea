@@ -5,6 +5,9 @@
 *.zip binary
 
 # Nothing below belongs in the distributed plugin.
+# .gitkeep included: they hold empty directories open in git, and the plugin
+# directory rejects hidden files outright.
+.gitkeep export-ignore
 /.github export-ignore
 /.wordpress-org export-ignore
 /tests export-ignore

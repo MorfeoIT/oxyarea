@@ -9,6 +9,19 @@ declare(strict_types=1);
 
 namespace OxyArea\Infrastructure;
 
+/*
+ * Every exception below is developer-facing: the messages carry service
+ * identifiers and class names written by us, never anything from a request, and
+ * they describe mistakes only a plugin author can make or fix. They are not
+ * escaped for two reasons. The values cannot contain markup. And the container
+ * has to stay loadable without WordPress so that it can be tested without one,
+ * which means esc_html() does not exist here.
+ *
+ * The rule is disabled inline rather than in phpcs.xml.dist because the plugin
+ * directory's own check ignores this project's ruleset and reads only the code.
+ */
+// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+
 /**
  * A small registry of lazily built, shared services.
  *
