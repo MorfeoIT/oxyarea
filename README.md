@@ -32,7 +32,7 @@ src/
   Plugin.php             builds the object graph, fires oxyarea_register_services
   Access/                who may see what — framework-free, unit-testable
   Admin/                 the admin menu and its screens
-  Dashboard/             the widget contract
+  Dashboard/             which dashboard, and the placeholders in it
   Infrastructure/        container, settings, migrations, activation, branding
   Persistence/           assignments and redirect rules, in the database
   Redirect/              where people go next — framework-free, unit-testable
@@ -119,6 +119,7 @@ scripts/testbed-setup.sh           # once, as root: database, WordPress, plugin-
 scripts/testbed-deploy.sh          # each time, as root: unpack /tmp/oxyarea.tar and activate
 scripts/testbed-login-flow.sh      # signs in over HTTP, the way a person would
 scripts/testbed-redirect-flow.sh   # checks where the browser is actually sent
+scripts/testbed-dashboard-flow.sh  # checks a dashboard reaches the right browser
 ```
 
 Build the package the way the directory will see it, `export-ignore` and all:
@@ -165,13 +166,17 @@ Sprint D complete: the redirect engine. Rules by role for signing in, signing
 out, registering and resetting a password; a fallback per event; and an ordering
 that is total rather than usually right.
 
-Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
-**Plugin Check reports no errors**, 157 unit tests pass, the 73 checks in
-`tests/manual/smoke.php` pass inside a real installation, and the 21 checks in
-the two flow scripts pass over HTTP.
+Sprint E complete: dashboards. One template per role, built in the block editor,
+with placeholders, three blocks of our own, and a preview that answers "what does
+this role get" without signing in as anybody.
 
-Next: Sprint E — dashboards. The dashboard model, resolution by role, the blocks
-and the preview.
+Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
+**Plugin Check reports no errors**, 191 unit tests pass, the 92 checks in
+`tests/manual/smoke.php` pass inside a real installation, and the 31 checks in
+the three flow scripts pass over HTTP.
+
+Next: Sprint F — content restriction. Protecting pages and posts by role, and
+keeping them out of search, feeds, the REST API and the sitemap.
 
 Still outstanding: the PHPUnit `integration` and `security` suites are empty. The
 manual scripts cover the same ground for now, but they are scripts with a pass

@@ -552,17 +552,27 @@ check( 'the agent content is there', false !== strpos( $carol_html, 'this is the
 check( 'and the name has been filled in', false !== strpos( $carol_html, (string) $carol->display_name ) );
 check( 'with no placeholder left behind', false === strpos( $carol_html, '{{' ) );
 
-// A display name with markup in it is ordinary carelessness or a deliberate
-// attempt; both come out as text.
-$awkward = 'Carol <script>alert(1)</script>';
-wp_update_user( array( 'ID' => $carol->ID, 'display_name' => $awkward ) );
+// Written straight into the table, past every sanitiser WordPress puts in the
+// way. Going through wp_update_user proves nothing here: it strips the tag on
+// the way in, so the rendering would look safe whether or not this plugin
+// escaped anything. The question is whether OUR layer holds on its own.
+global $wpdb;
+
+$wpdb->update( $wpdb->users, array( 'display_name' => 'Carol <script>alert(1)</script>' ), array( 'ID' => $carol->ID ) );
+clean_user_cache( $carol->ID );
+
+check(
+	'the hostile name really is in the database',
+	'Carol <script>alert(1)</script>' === get_user_by( 'id', $carol->ID )->display_name
+);
 
 $escaped_html = dashboards()->render_for( $carol->ID );
 
 check( 'a script tag in a display name does not reach the page', false === strpos( $escaped_html, '<script>' ) );
 check( 'it arrives as text instead', false !== strpos( $escaped_html, '&lt;script&gt;' ) );
 
-wp_update_user( array( 'ID' => $carol->ID, 'display_name' => 'Carol (agent)' ) );
+$wpdb->update( $wpdb->users, array( 'display_name' => 'Carol (agent)' ), array( 'ID' => $carol->ID ) );
+clean_user_cache( $carol->ID );
 
 echo "\n== an unreadable audience narrows, it does not widen ==\n";
 

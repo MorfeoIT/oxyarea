@@ -6,6 +6,51 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added — Sprint E, dashboards
+
+- **One template serves everybody who holds a role.** A site with four hundred
+  customers has one customer dashboard, and the four hundred and first customer
+  is not a content task. This is the product in one sentence.
+- Dashboards are a post type, so the block editor is the layout editor. Every
+  hour spent building one would have built something worse than the editor
+  already sitting in the same admin. Not public and not publicly queryable: the
+  block and the shortcode take no identifier from anywhere, so what appears is
+  what the resolver decided, and the only way to change it is to change somebody's
+  roles.
+- Resolution uses the same ladder as the redirect rules — a role beats "anybody
+  signed in", which beats the site default — because two screens answering the
+  same question differently would teach a site owner one rule and then break it.
+  There is deliberately no priority field: two dashboards for one role is a
+  mistake being made, not a preference being expressed, and a tie-break would make
+  it configurable instead of visible.
+- Placeholders — `{{display_name}}` and five siblings — are substitution and
+  nothing else, filled from a list the caller supplies. The specification forbids
+  evaluating PHP in an admin field, and rightly: it would make every account that
+  can edit a dashboard the equal of an administrator, and the role editor two
+  sprints ago decoration. Values are escaped before substitution, and unknown
+  placeholders are removed rather than left on a customer's screen.
+- Three blocks, not thirteen: the container that resolves which dashboard, a
+  greeting that knows who is reading it, and a read-only account summary.
+  WordPress already has a paragraph, a heading, a list and columns, and they are
+  better than anything written here to replace them.
+- The preview answers "which template would this role get, and how does it read"
+  without signing in as anybody, borrowing a capability or touching a session.
+  True impersonation stays out of scope, as it should: it is a serious capability
+  with a serious audit trail, not the price of previewing a layout.
+- A dashboard whose audience cannot be read is dropped rather than widened.
+  Reading it as the site default would take one role's page and show it to
+  everybody signed in.
+- `scripts/testbed-dashboard-flow.sh`: 10 checks over HTTP, including that a
+  signed-out visitor gets the sign-in form and none of the private content.
+
+### Fixed
+
+- The escaping test for dashboard placeholders planted its hostile value through
+  `wp_update_user`, which strips tags on the way in — so it would have passed
+  whether or not this plugin escaped anything. It now writes straight into the
+  table, past every sanitiser WordPress provides, and checks that our own layer
+  holds on its own. It does.
+
 ### Added — Sprint D, the redirect engine
 
 - Rules by role for four moments: signing in, signing out, registering and
