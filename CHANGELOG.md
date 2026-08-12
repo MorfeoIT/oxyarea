@@ -6,6 +6,38 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Verified on a real WordPress
+
+First run on WordPress 7.0.3, on the test bed at `test.44123.it/oxyarea`. The
+plugin activates without a single PHP notice, creates its table, writes its
+settings and grants its capabilities. What the run found, and what changed:
+
+- **Plugin Check ignores the project's `phpcs.xml.dist`** and applies its own
+  ruleset. Every exclusion in the project ruleset counted for nothing: the code
+  looked clean locally and would have failed review. The exclusions moved into
+  the code as `phpcs:ignore` comments, which both tools read, and the ruleset now
+  carries no escaping exclusions at all.
+- Exception messages were escaped where thrown *and* where printed, so an
+  administrator would have read `The role &quot;editor&quot;`. Now escaped once,
+  following the WordPress convention: at the throw, printed as-is by the single
+  place that prints them.
+- `.gitkeep` files shipped inside the package, and the plugin directory rejects
+  hidden files outright. Now `export-ignore`d.
+- The readme's short description was over the 150-character limit.
+- Plugin Check has DirectDB sniffs of its own that the existing `phpcs:disable`
+  block did not name.
+
+Plugin Check now reports no errors.
+
+- `tests/manual/smoke.php`: 34 checks against a real installation, covering the
+  role manager's refusals, the escalation guard, the assignment repository and
+  the resolver wired to real WordPress roles. Cleans up after itself. It also
+  confirmed the free/PRO boundary: a rule naming an individual user is stored and
+  read back correctly but matches nobody, because presenting a user as a subject
+  is what PRO's audience providers add.
+- `scripts/testbed-setup.sh` and `scripts/testbed-deploy.sh`, so the test bed is
+  reproducible rather than a thing that happened once.
+
 ### Added — Sprint B, authorisation and roles
 
 - **The access resolver.** One class decides who may see what, and it contains no

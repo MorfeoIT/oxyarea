@@ -105,6 +105,40 @@ gate is written in terms of them:
 Nothing ships if Alice can reach Bob's data by guessing a URL, changing an ID, or
 through REST, AJAX, search, a feed, the sitemap or a static file URL.
 
+## The test bed
+
+`https://test.44123.it/oxyarea`, on the Hestia server. A clean WordPress with no
+theme framework and no other plugins except `plugin-check`: a test bed exists to
+make it obvious which plugin caused what, and every extra plugin on it is a
+suspect. WP_DEBUG on, logging to file. The cast — alice, bob, carol — already
+exists as users.
+
+```bash
+scripts/testbed-setup.sh     # once, as root: database, WordPress, plugin-check, users
+scripts/testbed-deploy.sh    # each time, as root: unpack /tmp/oxyarea.tar and activate
+```
+
+Build the package the way the directory will see it, `export-ignore` and all:
+
+```bash
+git archive --format=tar --prefix=oxyarea/ -o /tmp/oxyarea.tar HEAD
+```
+
+Then, on the server:
+
+```bash
+wp plugin check oxyarea
+wp eval-file tests/manual/smoke.php
+```
+
+`tests/manual/smoke.php` exercises what only exists inside WordPress — the role
+manager's refusals, the escalation guard, the assignment repository and the
+resolver wired to real roles — and cleans up after itself. It is not PHPUnit; it
+is what covers those classes until the integration suite exists.
+
+**Never point the WordPress PHPUnit test library at a site's database.** It drops
+and recreates every table on each run. It needs a database of its own.
+
 ## Status
 
 Sprint A complete: bootstrap, container, schema migrations, capabilities,
@@ -114,10 +148,13 @@ Sprint B complete: the access resolver, the audience model, the assignment
 repository, the role manager with its refusals, the capability catalogue and the
 Roles screen. 87 unit tests; `php -l`, PHPCS, PHPStan level 8 all clean.
 
+Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
+**Plugin Check reports no errors**, 87 unit tests pass and the 34 checks in
+`tests/manual/smoke.php` pass inside a real installation.
+
 Next: Sprint C — frontend authentication. Login, logout, password reset and
 profile, as blocks and shortcodes.
 
-The integration and security suites are still empty: they need a WordPress test
-installation, which this machine does not have yet. Everything above is verified
-by the unit suite and static analysis, and nothing in it has run inside a real
-WordPress.
+Still outstanding: the PHPUnit `integration` and `security` suites are empty. The
+manual smoke script covers the same ground for now, but it is a script with a
+pass counter, not a test suite, and it does not run in CI.
