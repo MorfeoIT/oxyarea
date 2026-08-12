@@ -217,7 +217,28 @@ if it came to that.
 | Plugin Check | 0 errors, 1 warning |
 | PHP notices during a full run | none; no `debug.log` is created |
 
-## 9. What comes next
+## 9. Decision, 2026-08-12: submission waits for the family
+
+OxyArea will **not** be submitted to WordPress.org on its own. It waits until
+the rest of the OxyWP family is finished, and they go in together.
+
+The reason is §9b of the naming clearance. The first plugin approved is the one
+that settles the Oxy- prefix in practice, and a slug cannot be changed after
+approval. Submitting one to see what happens would be deciding for all of them
+without knowing it — and deciding it in the order that gives the least
+information for the most commitment. One naming decision, taken once, applied
+to the whole family, is the same work with none of that risk.
+
+What this costs: a slug cannot be reserved. WordPress.org is explicit that an
+empty plugin may not be submitted to hold a name, so `oxyarea` stays claimable
+by anybody until the day it is submitted. Nothing suggests anyone wants it —
+four Oxy-prefixed plugins exist in the whole directory — but the risk is real
+and it is the price of waiting.
+
+What this does **not** block: everything in this document is finished and
+verified. The plugin is releasable; it is simply not being released yet.
+
+## 10. What comes next
 
 The master prompt says to stop here. PRO begins only once the free core's APIs
 are stable, and the extension points PRO will need — `oxyarea_register_services`,
