@@ -80,7 +80,7 @@ final class LostPasswordForm extends Form {
 			'auth/lost-password',
 			$this->context(
 				array(
-					'label' => (string) ( $attributes['label'] ?? __( 'Email me a link', 'oxyarea' ) ),
+					'label' => $this->text( $attributes, 'label', __( 'Email me a link', 'oxyarea' ) ),
 				)
 			)
 		);

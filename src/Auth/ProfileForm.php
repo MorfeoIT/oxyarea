@@ -148,7 +148,7 @@ final class ProfileForm extends Form {
 				array(
 					'user'          => wp_get_current_user(),
 					'show_password' => (bool) ( $attributes['showPassword'] ?? true ),
-					'label'         => (string) ( $attributes['label'] ?? __( 'Save changes', 'oxyarea' ) ),
+					'label'         => $this->text( $attributes, 'label', __( 'Save changes', 'oxyarea' ) ),
 				)
 			)
 		);

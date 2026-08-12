@@ -148,4 +148,24 @@ abstract class Form implements FormHandler {
 		// submission, describing something that happened two clicks ago.
 		return remove_query_arg( Notices::PARAMETER, $safe );
 	}
+
+	/**
+	 * A block attribute, with a default that survives an empty one.
+	 *
+	 * Every block.json here declares its text attributes with a default of "",
+	 * so the attribute always arrives — as an empty string. A null-coalescing
+	 * fallback never fires against that, which is how the sign-in form came to
+	 * render a submit button with no words in it. Nothing caught it: every check
+	 * asked whether the button was there, and none asked what it said.
+	 *
+	 * @param array<string, mixed> $attributes The block attributes.
+	 * @param string               $name       Which one.
+	 * @param string               $fallback   What to use when it is empty.
+	 * @return string
+	 */
+	protected function text( array $attributes, string $name, string $fallback ): string {
+		$value = isset( $attributes[ $name ] ) ? trim( (string) $attributes[ $name ] ) : '';
+
+		return '' !== $value ? $value : $fallback;
+	}
 }

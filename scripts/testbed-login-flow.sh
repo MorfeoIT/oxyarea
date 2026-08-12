@@ -61,6 +61,11 @@ grep -q 'oxyarea_action" value="lost-password"' "${PAGE}" && check "and the forg
 NONCE=$(grep -o 'name="_wpnonce" value="[^"]*"' "${PAGE}" | head -1 | sed 's/.*value="//; s/"//')
 [ -n "${NONCE}" ] && check "the form carries a nonce" yes || check "the form carries a nonce" no
 
+# A button with no words in it renders perfectly and passes every check that
+# asks whether a button is there. This asks what it says.
+LABEL=$(grep -o '<button type="submit"[^>]*>[^<]*' "${PAGE}" | head -1 | sed 's/.*>//' | tr -d ' 	')
+[ -n "${LABEL}" ] && check "and the submit button has words on it (${LABEL})" yes || check "and the submit button has words on it" no
+
 echo "== signing in with the wrong password =="
 
 ALICE_PASS=$(grep '^alice / ' "${CREDS}" | sed 's|^alice / ||')

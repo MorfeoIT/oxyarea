@@ -90,7 +90,7 @@ final class LogoutForm extends Form {
 			'auth/logout',
 			$this->context(
 				array(
-					'label'       => (string) ( $attributes['label'] ?? __( 'Sign out', 'oxyarea' ) ),
+					'label'       => $this->text( $attributes, 'label', __( 'Sign out', 'oxyarea' ) ),
 					'redirect_to' => (string) ( $attributes['redirectTo'] ?? '' ),
 				)
 			)

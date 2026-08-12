@@ -166,7 +166,7 @@ final class LoginForm extends Form {
 					'lost_password_url' => wp_lostpassword_url( $this->current_url() ),
 					'show_remember'     => (bool) ( $attributes['showRemember'] ?? true ),
 					'show_lost'         => (bool) ( $attributes['showLostPassword'] ?? true ),
-					'label'             => (string) ( $attributes['label'] ?? __( 'Sign in', 'oxyarea' ) ),
+					'label'             => $this->text( $attributes, 'label', __( 'Sign in', 'oxyarea' ) ),
 				)
 			)
 		);
