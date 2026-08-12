@@ -4,6 +4,9 @@
 *.jpg binary
 *.zip binary
 
+# Verbatim FSF text. Nothing here reformats it.
+/LICENSE -text
+
 # Nothing below belongs in the distributed plugin.
 # .gitkeep included: they hold empty directories open in git, and the plugin
 # directory rejects hidden files outright.
