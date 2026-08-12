@@ -6,6 +6,52 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added — Sprint F, content restriction
+
+- Protect a page or post by role, or by "anybody signed in", from a box on the
+  editor.
+- **The five release blockers, closed and checked.** The specification refuses a
+  release if private content leaks through search, feeds, sitemaps or REST, or if
+  one customer can reach another's page. Those are five different ways of asking
+  WordPress a question, and a plugin that closes four has a hole in the fifth.
+  `scripts/testbed-restriction-flow.sh` asks all five over real HTTP, as a
+  stranger and then as each of two customers.
+- Two guards. The one at `template_redirect` stops a private page being *read* —
+  the one that matters, since a site that filtered every listing perfectly and
+  left the URL working would be a site where the page is one guess away. The
+  other keeps it out of listings, the REST API, the sitemap and neighbour links.
+- Filtering happens after the query rather than inside it. Expressing "posts this
+  person may see" as a WHERE clause means reimplementing the resolver in a second
+  language, where it cannot be tested and where every subject type PRO adds has to
+  be written twice. The cost is that a page of ten may show eight; the benefit is
+  that what it shows is decided by the same code that decides everything else.
+- Restriction is stored as assignments — the rows the resolver already reads. No
+  second table and no "is private" flag to fall out of step: a page with no rows
+  is public, a page with rows is private to whoever they name. The one new
+  question is "is this restricted at all", which has to be asked first, because a
+  resolver that refuses whatever nobody granted would refuse every post on a blog.
+- Four behaviours for a refusal, and the differences matter. 404 is the only one
+  that does not confirm the page exists, which on a site whose private area is the
+  product is often the point. Sending somebody to sign in when they are already
+  signed in is a loop, so it becomes a message; so does sending them to a sign-in
+  page the site has not configured.
+- "Restricted, but nobody named" is stored as exactly that. Quietly turning it
+  back into a public page would be the opposite of what was clicked.
+
+### Fixed
+
+- The dashboard post type declared `edit_post`, `read_post` and `delete_post`
+  alongside `map_meta_cap`, which turns a meta capability into a primitive one.
+  WP_DEBUG on the test bed logged twenty "map_meta_cap was called incorrectly"
+  notices. Only the primitives are declared now.
+
+### Known
+
+- Plugin Check reports one warning, and it is a fair one: `post__not_in` on the
+  sitemap query does not scale to very large sets. The alternatives are worse — a
+  WHERE clause duplicating the resolver, or a leak — so it stays, and it is worth
+  revisiting when PRO's file vault makes large sets ordinary.
+
 ### Added — Sprint E, dashboards
 
 - **One template serves everybody who holds a role.** A site with four hundred
