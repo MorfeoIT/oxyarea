@@ -21,8 +21,8 @@
 #   WP_DB_HOST      database host        (default 127.0.0.1)
 #   WP_VERSION      WordPress to fetch   (default latest)
 #
-# It prints the path of the config file it wrote. Pass that path to PHPUnit as
-# WP_PHPUNIT__TESTS_CONFIG.
+# It prints the path of the config file it wrote, and nothing else, on stdout.
+# Pass that path to PHPUnit as WP_PHPUNIT__TESTS_CONFIG.
 
 set -euo pipefail
 
@@ -49,7 +49,10 @@ if [ ! -f "${core}/wp-load.php" ]; then
 		archive="https://wordpress.org/wordpress-${wp_version}.tar.gz"
 	fi
 
-	echo "Fetching ${archive}"
+	# Progress goes to stderr. Stdout carries exactly one thing, the path of the
+	# config file, so that `config=$(scripts/wordpress-test-env.sh)` is a whole
+	# and usable value rather than something a caller has to sift.
+	echo "Fetching ${archive}" >&2
 
 	mkdir -p "${core}"
 	curl -fsSL "${archive}" | tar -xz --strip-components=1 -C "${core}"
