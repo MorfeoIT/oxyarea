@@ -91,7 +91,7 @@ final class RedirectService implements Registrable {
 		add_filter( 'logout_redirect', array( $this, 'after_logout' ), 20, 3 );
 		add_filter( 'registration_redirect', array( $this, 'after_registration' ), 20 );
 
-		add_filter( 'oxyarea_login_destination', array( $this, 'after_login_form' ), 10, 2 );
+		add_filter( 'oxyarea_login_destination', array( $this, 'after_login_form' ), 10, 3 );
 		add_filter( 'oxyarea_logout_destination', array( $this, 'after_logout_form' ), 10, 2 );
 		add_filter( 'oxyarea_password_reset_destination', array( $this, 'after_password_reset' ), 10, 2 );
 
@@ -164,12 +164,18 @@ final class RedirectService implements Registrable {
 	/**
 	 * Where somebody goes after signing in through OxyArea's own form.
 	 *
+	 * Somebody who asked for a particular page keeps it, exactly as on
+	 * WordPress's own login_redirect. The two paths into this plugin have to
+	 * agree about that, or where a person lands depends on which form they
+	 * happened to use.
+	 *
 	 * @param string        $destination Where the form was going to send them.
 	 * @param WP_User|mixed $user        Who signed in.
+	 * @param string        $requested   What the request asked for, empty if it asked for nothing.
 	 * @return string
 	 */
-	public function after_login_form( string $destination, $user ): string {
-		if ( ! $user instanceof WP_User ) {
+	public function after_login_form( string $destination, $user, string $requested = '' ): string {
+		if ( ! $user instanceof WP_User || '' !== trim( $requested ) ) {
 			return $destination;
 		}
 

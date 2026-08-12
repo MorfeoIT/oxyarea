@@ -110,9 +110,14 @@ final class LoginForm extends Form {
 
 		wp_set_current_user( $user->ID );
 
-		$destination = Destination::requested(
-			Destination::after_login( (string) $this->settings->get( 'default_login_redirect', '' ) )
-		);
+		// Whether they asked for somewhere in particular matters to whoever
+		// filters this: a redirect rule should decide where people go by
+		// default, not overrule the "sign in to read this, we will bring you
+		// back" link they followed to get here.
+		$requested   = Destination::requested( '' );
+		$destination = '' !== $requested
+			? $requested
+			: Destination::after_login( (string) $this->settings->get( 'default_login_redirect', '' ) );
 
 		/**
 		 * Filters where somebody lands after signing in through OxyArea.
@@ -125,8 +130,9 @@ final class LoginForm extends Form {
 		 *
 		 * @param string   $destination Where they are about to go.
 		 * @param \WP_User $user        Who just signed in.
+		 * @param string   $requested   What the request asked for, empty if it asked for nothing.
 		 */
-		$destination = (string) apply_filters( 'oxyarea_login_destination', $destination, $user );
+		$destination = (string) apply_filters( 'oxyarea_login_destination', $destination, $user, $requested );
 
 		wp_safe_redirect( Destination::make_safe( $destination, home_url( '/' ) ) );
 

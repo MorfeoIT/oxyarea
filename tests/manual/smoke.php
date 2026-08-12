@@ -366,6 +366,113 @@ check(
 	home_url( '/private/' ) === \OxyArea\Auth\Destination::make_safe( home_url( '/private/' ), '/fallback/' )
 );
 
+echo "\n== the redirect rules table exists ==\n";
+
+global $wpdb;
+
+$redirect_table = \OxyArea\Infrastructure\Migrator::table( \OxyArea\Infrastructure\Migrator::TABLE_REDIRECT_RULES );
+
+check(
+	'migration 2 created the table',
+	$redirect_table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $redirect_table ) )
+);
+check(
+	'and the schema version says so',
+	2 === (int) get_option( \OxyArea\Infrastructure\Migrator::VERSION_OPTION )
+);
+
+echo "\n== where people land after signing in ==\n";
+
+$rules = new \OxyArea\Persistence\RedirectRuleRepository();
+
+/**
+ * A redirect service with a fresh audience cache, since roles change during this run.
+ *
+ * @return \OxyArea\Redirect\RedirectService
+ */
+function redirects(): \OxyArea\Redirect\RedirectService {
+	return new \OxyArea\Redirect\RedirectService(
+		new \OxyArea\Redirect\RedirectResolver(),
+		new \OxyArea\Persistence\RedirectRuleRepository(),
+		new \OxyArea\Access\AudienceResolver( array( new \OxyArea\Roles\RoleAudienceProvider() ) ),
+		new \OxyArea\Infrastructure\Settings()
+	);
+}
+
+$login_event = \OxyArea\Redirect\RedirectEvent::LOGIN;
+
+$rules->save( new \OxyArea\Redirect\RedirectRule( $login_event, null, '/shop/' ) );
+$rules->save( new \OxyArea\Redirect\RedirectRule( $login_event, Subject::role( 'subscriber' ), '/customers/' ) );
+$agent_rule = $rules->save( new \OxyArea\Redirect\RedirectRule( $login_event, Subject::role( $agent ), '/agents/', 5 ) );
+
+check( 'a stored rule comes back with an identifier', $agent_rule->id() > 0 );
+check( 'and all three read back from the database', 3 === count( $rules->for_event( $login_event ) ) );
+
+$home = home_url( '/' );
+
+check(
+	'Alice, a subscriber, lands on the customers page',
+	'/customers/' === redirects()->decide( $login_event, $alice->ID, $home )
+);
+check(
+	'Carol, an agent, lands on the agents page',
+	'/agents/' === redirects()->decide( $login_event, $carol->ID, $home )
+);
+check(
+	'a role rule beats the rule for everybody, whatever the priority',
+	'/shop/' !== redirects()->decide( $login_event, $alice->ID, $home )
+);
+
+echo "\n== when two rules both apply ==\n";
+
+get_user_by( 'id', $carol->ID )->add_role( 'subscriber' );
+
+check(
+	'the lower priority number wins',
+	'/agents/' === redirects()->decide( $login_event, $carol->ID, $home )
+);
+
+$rules->set_enabled( $agent_rule->id(), false );
+
+check(
+	'turning that rule off falls through to the other one',
+	'/customers/' === redirects()->decide( $login_event, $carol->ID, $home )
+);
+
+$rules->set_enabled( $agent_rule->id(), true );
+
+echo "\n== a rule for another moment is not consulted ==\n";
+
+check(
+	'signing out is not governed by a sign-in rule',
+	$home === redirects()->decide( \OxyArea\Redirect\RedirectEvent::LOGOUT, $carol->ID, $home )
+);
+
+echo "\n== a destination off this site is refused ==\n";
+
+// Stored rules pass through the same guard as anything from a request, so even a
+// row written straight into the table cannot send somebody elsewhere.
+$rules->save(
+	new \OxyArea\Redirect\RedirectRule(
+		\OxyArea\Redirect\RedirectEvent::PASSWORD_RESET,
+		null,
+		'https://evil.example/taken'
+	)
+);
+
+check(
+	'a stored off-site destination falls back',
+	$home === redirects()->decide( \OxyArea\Redirect\RedirectEvent::PASSWORD_RESET, $alice->ID, $home )
+);
+
+foreach ( $rules->all() as $stored_rule ) {
+	$rules->delete( $stored_rule->id() );
+}
+
+check( 'the rules are gone', array() === $rules->all() );
+
+get_user_by( 'id', $carol->ID )->remove_role( 'subscriber' );
+
 echo "\n== cleaning up ==\n";
 
 wp_delete_post( (int) $post_id, true );
