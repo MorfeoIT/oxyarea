@@ -37,7 +37,7 @@ if ( null === $oxyarea_page ) {
 			'post_status'  => 'publish',
 			'post_title'   => 'Sign in',
 			'post_name'    => $oxyarea_slug,
-			'post_content' => "<!-- wp:oxyarea/login /-->\n<!-- wp:oxyarea/lost-password /-->\n<!-- wp:oxyarea/reset-password /-->",
+			'post_content' => "<!-- wp:oxyarea/login /-->\n<!-- wp:oxyarea/lost-password /-->\n<!-- wp:oxyarea/reset-password /-->\n<!-- wp:oxyarea/profile /-->",
 		)
 	);
 } else {

@@ -35,7 +35,24 @@ check() {
 
 wp() { sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp $*"; }
 
-nonce_from() { grep -o "name=\"_wpnonce\" value=\"[^\"]*\"" "$1" | sed -n "${2}p" | sed 's/.*value="//; s/"//'; }
+# The page carries three forms, so a nonce cannot be picked by position: with a
+# valid key the reset form is the third, without one it is not there at all.
+# Each form emits exactly one nonce and one action, in that order, so the two
+# lists line up and the nonce can be matched to the form it belongs to.
+nonce_for() {
+  local file=$1 want=$2 i=1
+  local -a nonces actions
+  mapfile -t nonces < <(grep -o 'name="_wpnonce" value="[^"]*"' "${file}" | sed 's/.*value="//; s/"//')
+  mapfile -t actions < <(grep -o 'name="oxyarea_action" value="[^"]*"' "${file}" | sed 's/.*value="//; s/"//')
+  for a in "${actions[@]}"; do
+    if [ "${a}" = "${want}" ]; then
+      echo "${nonces[$((i - 1))]}"
+      return 0
+    fi
+    i=$((i + 1))
+  done
+  echo ""
+}
 
 password_for() { sed -n "s|^$1 *[/] *||p" "${CREDS}" | head -1; }
 
@@ -58,7 +75,7 @@ chown "${USERNAME}:${USERNAME}" "${MAILLOG}"
 echo "== asking for a reset, for somebody who does not exist =="
 
 curl -sS -u "${BASIC}" -c "${JAR}" -o "${PAGE}" "${URL}"
-NONCE=$(nonce_from "${PAGE}" 2)
+NONCE=$(nonce_for "${PAGE}" lost-password)
 
 curl -sSL -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o "${PAGE}" \
   --data-urlencode "oxyarea_action=lost-password" \
@@ -80,7 +97,7 @@ echo "== asking for a reset, for Alice =="
 
 rm -f "${JAR}"
 curl -sS -u "${BASIC}" -c "${JAR}" -o "${PAGE}" "${URL}"
-NONCE=$(nonce_from "${PAGE}" 2)
+NONCE=$(nonce_for "${PAGE}" lost-password)
 
 curl -sSL -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o "${PAGE}" \
   --data-urlencode "oxyarea_action=lost-password" \
@@ -125,7 +142,7 @@ grep -q "cannot be used any more" "${PAGE}" \
 
 KEY=$(echo "${RESET_URL}" | sed -n 's/.*oxyarea-key=\([^&]*\).*/\1/p')
 LOGIN=$(echo "${RESET_URL}" | sed -n 's/.*oxyarea-login=\([^&]*\).*/\1/p')
-NONCE=$(nonce_from "${PAGE}" 1)
+NONCE=$(nonce_for "${PAGE}" reset-password)
 
 echo "== a tampered key is refused =="
 
@@ -146,7 +163,7 @@ echo "== two passwords that do not match are refused =="
 
 rm -f "${JAR}"
 curl -sS -u "${BASIC}" -c "${JAR}" -o "${PAGE}" "${RESET_URL}"
-NONCE=$(nonce_from "${PAGE}" 1)
+NONCE=$(nonce_for "${PAGE}" reset-password)
 
 curl -sS -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o "${PAGE}" \
   --data-urlencode "oxyarea_action=reset-password" \
@@ -167,7 +184,7 @@ NEW_PASS="Rimessa-A-Posto-7781"
 
 rm -f "${JAR}"
 curl -sS -u "${BASIC}" -c "${JAR}" -o "${PAGE}" "${RESET_URL}"
-NONCE=$(nonce_from "${PAGE}" 1)
+NONCE=$(nonce_for "${PAGE}" reset-password)
 
 CODE=$(curl -sS -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o /dev/null -w '%{http_code}' \
   --data-urlencode "oxyarea_action=reset-password" \
@@ -189,7 +206,7 @@ echo "== signing in with it =="
 
 rm -f "${JAR}"
 curl -sS -u "${BASIC}" -c "${JAR}" -o "${PAGE}" "${URL}"
-NONCE=$(nonce_from "${PAGE}" 1)
+NONCE=$(nonce_for "${PAGE}" login)
 
 CODE=$(curl -sS -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o /dev/null -w '%{http_code}' \
   --data-urlencode "oxyarea_action=login" \
@@ -200,6 +217,31 @@ CODE=$(curl -sS -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o /dev/null -w '%{http_co
 
 [ "${CODE}" = "302" ] && check "the new password works" yes || check "the new password works (got ${CODE})" no
 grep -q 'wordpress_logged_in' "${JAR}" && check "and leaves a session" yes || check "and leaves a session" no
+
+echo "== while she is signed in, her own details ==
+
+  (the other step of the definition of done that had never been exercised)"
+
+curl -sSL -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o "${PAGE}" "${URL}"
+
+grep -q 'name="user_email"' "${PAGE}"   && check "the profile form is there for her" yes   || check "the profile form is there for her" no
+
+grep -q "alice@example.test" "${PAGE}"   && check "showing her own address" yes   || check "showing her own address" no
+
+NONCE=$(nonce_for "${PAGE}" profile)
+
+curl -sSL -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o "${PAGE}"   --data-urlencode "oxyarea_action=profile"   --data-urlencode "_wpnonce=${NONCE}"   --data-urlencode "first_name=Alice"   --data-urlencode "last_name=Rossi"   --data-urlencode "display_name=Alice Rossi"   --data-urlencode "user_email=alice@example.test"   "${URL}"
+
+grep -q "details have been saved" "${PAGE}"   && check "changing her name needs no password" yes   || check "changing her name needs no password" no
+
+NONCE=$(nonce_for "${PAGE}" profile)
+
+curl -sSL -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o "${PAGE}"   --data-urlencode "oxyarea_action=profile"   --data-urlencode "_wpnonce=${NONCE}"   --data-urlencode "display_name=Alice Rossi"   --data-urlencode "user_email=somebody-else@example.test"   "${URL}"
+
+grep -q "Enter your current password" "${PAGE}"   && check "changing her address does" yes   || check "changing her address does" no
+
+CURRENT_EMAIL=$(wp "user get alice --field=user_email")
+[ "${CURRENT_EMAIL}" = "alice@example.test" ]   && check "and the address was not changed" yes   || check "and the address was not changed (now ${CURRENT_EMAIL})" no
 
 echo "== the link cannot be used twice =="
 
@@ -216,7 +258,7 @@ sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && OXYAREA_RESTORE='${ORIGINAL_PA
 
 rm -f "${JAR}"
 curl -sS -u "${BASIC}" -c "${JAR}" -o "${PAGE}" "${URL}"
-NONCE=$(nonce_from "${PAGE}" 1)
+NONCE=$(nonce_for "${PAGE}" login)
 
 CODE=$(curl -sS -u "${BASIC}" -b "${JAR}" -c "${JAR}" -o /dev/null -w '%{http_code}' \
   --data-urlencode "oxyarea_action=login" \

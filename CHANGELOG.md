@@ -6,6 +6,32 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **Forms redirected to the site's front page instead of back to themselves.**
+  `Form::current_url()` read `WP::$request`, which is empty where it was called:
+  forms are handled on `init`, and WordPress does not work out which page was
+  asked for until `parse_request`, several hooks later. So asking for a password
+  reset bounced the person to the home page carrying a confirmation about a form
+  they could no longer see, and the same applied to setting a new password and to
+  saving a profile. Every unit test passed, every in-WordPress check passed and
+  Plugin Check was clean throughout: the bug lived in the one place none of them
+  looks, which is what happens after a redirect.
+
+### Added
+
+- `scripts/testbed-reset-flow.sh`: the forgotten-password flow over HTTP, from
+  "I have forgotten it" to signing in with the new password. 22 checks, including
+  that a stranger and a real account get word-for-word the same answer, that the
+  link comes back to the site rather than wp-login.php, that changing one
+  character of the key invalidates it, and that a spent link cannot be used twice.
+  It also exercises profile editing, and that changing an email address needs the
+  current password while changing a name does not.
+- `scripts/testbed-mail-capture.php`, a test-bed mu-plugin that writes outgoing
+  mail to a file. The fixtures have `@example.test` addresses, which resolve to
+  nothing by design, so capturing is not a way around the test — it is the only
+  way to run it.
+
 ### Added — Sprint F, content restriction
 
 - Protect a page or post by role, or by "anybody signed in", from a box on the

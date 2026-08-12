@@ -4,9 +4,11 @@
 **Assessed:** 12 August 2026
 **Assessed against:** WordPress 7.0.3, PHP 8.3.33, on the test bed at
 `test.44123.it/oxyarea`
-**Verdict:** the code is ready to submit. **Three things are not, and none of
-them is code.** They are listed under "Before submitting", and the shortest is
-ten minutes.
+**Verdict:** the code is ready to submit. **Two things are not, and neither is
+code.** They are listed under "Before submitting".
+
+*Updated 12 August 2026, later the same day: the password reset flow has now been
+run end to end, and so has profile editing. Doing so found a real bug — see §5.*
 
 The master prompt asks for this report before any PRO work begins. It is written
 to be read by somebody deciding whether to press send, so it says what was
@@ -29,7 +31,7 @@ Each is marked with how it was checked, not with how confident anybody feels.
 | 6 | Redirect each role after login | done | 6 checks over HTTP in `scripts/testbed-redirect-flow.sh` |
 | 7 | Sign in as each test user | done | Alice and Bob, over HTTP, with real session cookies |
 | 8 | See only the correct dashboard and content | done | The same three flow scripts, from three points of view |
-| 9 | Sign out, reset a password, edit a profile | **partly** | Sign-out verified over HTTP. **Password reset and profile editing have not been exercised end to end** — see §5 |
+| 9 | Sign out, reset a password, edit a profile | done | All three over HTTP. The reset runs from "I have forgotten it" to signing in with the new password, via a captured email: 22 checks in `scripts/testbed-reset-flow.sh` |
 
 ## 2. Plugin Check
 
@@ -65,7 +67,7 @@ looked for rather than assumed absent.
 | Private content in **search** | closed | `restriction-flow`, as a stranger and as Bob |
 | Private content in **feeds** | closed | same |
 | Private content in **REST** | closed | 404 on the single item, absent from the collection |
-| Private content in **sitemaps** | closed | verified with `blog_public` turned on for the check — see §5 |
+| Private content in **sitemaps** | closed | verified with `blog_public` turned on for the check — see §6 |
 | Open redirect | closed | 33 unit tests on the guard; `redirect_to=https://evil.example` refused over HTTP |
 | Privilege escalation | closed | a subscriber cannot grant `install_plugins`, `edit_users`, `manage_options`, or even `upload_files` |
 | SQL injection | closed by construction | every value prepared; the only interpolations are our own table names and integers from our own table, each annotated |
@@ -86,65 +88,75 @@ looked for rather than assumed absent.
 | Correct headers | Name, URI, description, version, requires, author, licence, text domain, domain path |
 | Upsell restraint | One dismissible notice, once, on OxyArea's own screens and the plugins list, which disappears permanently after the wizard is used |
 
-## 5. What has not been verified, and what that means
+## 5. What running the reset flow found
+
+Closing the gap was worth it on its own. `Form::current_url()` read
+`WP::$request`, which is **empty where it was called**: forms are handled on
+`init`, and WordPress does not work out which page was asked for until
+`parse_request`, several hooks later.
+
+So asking for a password reset bounced the person to the site's front page,
+carrying a confirmation about a form they could no longer see. The same applied
+to setting a new password and to saving a profile. Every unit test passed, every
+in-WordPress check passed, and Plugin Check was clean throughout: the bug lived
+in the one place none of them looks, which is what happens after a redirect.
+
+Mail is captured rather than sent on the test bed, by a mu-plugin in `scripts/`.
+That is not a shortcut around the test: the fixtures have `@example.test`
+addresses, which resolve to nothing by design, so no SMTP configuration could
+ever deliver to them. What needed proving is the link WordPress puts in the
+message and what happens when somebody follows it, and neither is a question
+about a mail server.
+
+## 6. What has not been verified, and what that means
 
 Written plainly, because an unverified thing is not a working thing.
 
-1. **The password reset flow has not been run end to end.** The code is there and
-   its pieces are exercised, but nobody has clicked a link in a real email on this
-   test bed, because the bed has no outbound mail. Until somebody does, the claim
-   "a customer can reset their own password" is untested. *This is the largest
-   gap in the report.*
-2. **Profile editing has not been exercised over HTTP.** Same shape of gap,
-   smaller consequence.
-3. **The PHPUnit `integration` and `security` suites are empty.** Their ground is
-   covered by `tests/manual/smoke.php` (109 checks) and the four flow scripts (48
+1. **The PHPUnit `integration` and `security` suites are empty.** Their ground is
+   covered by `tests/manual/smoke.php` (109 checks) and the five flow scripts (70
    checks), but those are scripts with a pass counter, not suites, and they do not
-   run in CI. Nothing regressed silently during six sprints because they were run
+   run in CI. Nothing regressed silently across seven sprints because they were run
    by hand every time; that will not survive a second contributor.
-4. **The sitemap needs `blog_public` on to exist at all.** WordPress serves no
+2. **The sitemap needs `blog_public` on to exist at all.** WordPress serves no
    sitemap on a site set to discourage search engines, which the test bed is. The
    flow script turns it on for two checks and off again. Worth knowing, because
    without that the channel looks fine only because it is absent.
-5. **No rate limiting on sign-in.** The same as WordPress itself, and out of scope
+3. **No rate limiting on sign-in.** The same as WordPress itself, and out of scope
    in the specification, but more pointed on a site whose purpose is a private
    area. A decision to take, not a defect.
-6. **One person has reviewed this.** A security review by somebody who did not
+4. **One person has reviewed this.** A security review by somebody who did not
    write the code has not happened.
 
-## 6. Before submitting
+## 7. Before submitting
 
-Three things, none of them code:
+Two things, neither of them code:
 
-1. **Run the password reset flow on a site that can send mail.** It is the one
-   step of the definition of done that is unproven, and it is the step a customer
-   uses when they are already annoyed.
-2. **Complete the Name Lock checklist** in `docs/00_NAMING_CLEARANCE.md` §10. Four
+1. **Complete the Name Lock checklist** in `docs/00_NAMING_CLEARANCE.md` §10. Four
    of its seven boxes are ticked by the indexed searches recorded there; the
    direct EUIPO / TMview / WIPO similarity check is a manual step nobody has done,
    and the slug is only really settled by approval itself.
-3. **Add screenshots and the `Screenshots` section to `readme.txt`.** Not required
+2. **Add screenshots and the `Screenshots` section to `readme.txt`.** Not required
    for acceptance, and the first thing anybody reads on the directory page.
 
 Then submit. The slug becomes real on approval, and the branding strings are
 centralised in `Brand` precisely so that a pre-launch rename would still be cheap
 if it came to that.
 
-## 7. The numbers
+## 8. The numbers
 
 | | |
 |---|---|
 | Files in the distributed package | 104 |
 | Unit tests | 225, no WordPress required |
 | Checks inside a real WordPress | 109 |
-| Checks over HTTP | 48, across four flow scripts |
+| Checks over HTTP | 70, across five flow scripts |
 | `php -l` | clean |
 | PHPCS, WordPress standards | clean |
 | PHPStan level 8 | clean |
 | Plugin Check | 0 errors, 1 warning |
 | PHP notices during a full run | none; no `debug.log` is created |
 
-## 8. What comes next
+## 9. What comes next
 
 The master prompt says to stop here. PRO begins only once the free core's APIs
 are stable, and the extension points PRO will need — `oxyarea_register_services`,

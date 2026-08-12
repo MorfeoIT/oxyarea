@@ -122,7 +122,14 @@ scripts/testbed-login-flow.sh      # signs in over HTTP, the way a person would
 scripts/testbed-redirect-flow.sh   # checks where the browser is actually sent
 scripts/testbed-dashboard-flow.sh  # checks a dashboard reaches the right browser
 scripts/testbed-restriction-flow.sh # the release blockers: search, feed, REST, sitemap
+scripts/testbed-reset-flow.sh       # forgotten password, from the email to signing in
 ```
+
+The reset flow needs `scripts/testbed-mail-capture.php` installed as an
+mu-plugin, which writes outgoing mail to `wp-content/mail.log` instead of sending
+it. Not a shortcut: the fixtures have `@example.test` addresses that resolve to
+nothing by design, so no mail server could deliver to them. What needs proving is
+the link in the message and what happens when somebody follows it.
 
 Build the package the way the directory will see it, `export-ignore` and all:
 
@@ -181,13 +188,13 @@ wizard, and 274 translatable strings in `languages/oxyarea.pot`.
 
 Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
 **Plugin Check reports no errors and one warning**, 225 unit tests pass, the 109
-checks in `tests/manual/smoke.php` pass inside a real installation, and the 48
-checks in the four flow scripts pass over HTTP — including the release blockers,
-asked as a stranger and then as each of two customers.
+checks in `tests/manual/smoke.php` pass inside a real installation, and the 70
+checks in the five flow scripts pass over HTTP — including the release blockers
+asked as a stranger and then as each of two customers, and the forgotten-password
+flow from the email to signing in with the new password.
 
 **Read [`docs/SUBMISSION_READINESS.md`](docs/SUBMISSION_READINESS.md) before
-submitting.** Three things are outstanding and none of them is code: the password
-reset flow has never been run on a site that can send mail, the Name Lock
+submitting.** Two things are outstanding and neither is code: the Name Lock
 checklist has a manual trademark step nobody has done, and the readme has no
 screenshots.
 
