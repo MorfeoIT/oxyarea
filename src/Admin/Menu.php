@@ -44,16 +44,50 @@ final class Menu implements Registrable {
 	private DashboardPreviewScreen $preview;
 
 	/**
+	 * The settings screen.
+	 *
+	 * @var SettingsScreen
+	 */
+	private SettingsScreen $settings;
+
+	/**
+	 * The tools screen.
+	 *
+	 * @var ToolsScreen
+	 */
+	private ToolsScreen $tools;
+
+	/**
+	 * The setup wizard.
+	 *
+	 * @var Wizard
+	 */
+	private Wizard $wizard;
+
+	/**
 	 * Build the menu.
 	 *
 	 * @param RolesScreen            $roles     The roles screen.
 	 * @param RedirectsScreen        $redirects The redirects screen.
 	 * @param DashboardPreviewScreen $preview   The dashboard preview.
+	 * @param SettingsScreen         $settings  The settings screen.
+	 * @param ToolsScreen            $tools     The tools screen.
+	 * @param Wizard                 $wizard    The setup wizard.
 	 */
-	public function __construct( RolesScreen $roles, RedirectsScreen $redirects, DashboardPreviewScreen $preview ) {
+	public function __construct(
+		RolesScreen $roles,
+		RedirectsScreen $redirects,
+		DashboardPreviewScreen $preview,
+		SettingsScreen $settings,
+		ToolsScreen $tools,
+		Wizard $wizard
+	) {
 		$this->roles     = $roles;
 		$this->redirects = $redirects;
 		$this->preview   = $preview;
+		$this->settings  = $settings;
+		$this->tools     = $tools;
+		$this->wizard    = $wizard;
 	}
 
 	/**
@@ -109,6 +143,33 @@ final class Menu implements Registrable {
 			Capabilities::MANAGE_REDIRECTS,
 			RedirectsScreen::SLUG,
 			array( $this->redirects, 'render' )
+		);
+
+		add_submenu_page(
+			Brand::MENU_SLUG,
+			__( 'Settings', 'oxyarea' ),
+			__( 'Settings', 'oxyarea' ),
+			Capabilities::MANAGE,
+			SettingsScreen::SLUG,
+			array( $this->settings, 'render' )
+		);
+
+		add_submenu_page(
+			Brand::MENU_SLUG,
+			__( 'Tools', 'oxyarea' ),
+			__( 'Tools', 'oxyarea' ),
+			Capabilities::MANAGE,
+			ToolsScreen::SLUG,
+			array( $this->tools, 'render' )
+		);
+
+		add_submenu_page(
+			Brand::MENU_SLUG,
+			__( 'Set up a private area', 'oxyarea' ),
+			__( 'Setup', 'oxyarea' ),
+			Capabilities::MANAGE,
+			Wizard::SLUG,
+			array( $this->wizard, 'render' )
 		);
 	}
 }

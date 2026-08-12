@@ -20,6 +20,9 @@ use OxyArea\Admin\Menu;
 use OxyArea\Admin\RedirectsScreen;
 use OxyArea\Admin\RestrictionMetabox;
 use OxyArea\Admin\RolesScreen;
+use OxyArea\Admin\SettingsScreen;
+use OxyArea\Admin\ToolsScreen;
+use OxyArea\Admin\Wizard;
 use OxyArea\Auth\FormController;
 use OxyArea\Auth\FormErrors;
 use OxyArea\Auth\FormHandler;
@@ -58,6 +61,7 @@ use OxyArea\Roles\CapabilityManagerCheck;
 use OxyArea\Roles\ManagedRoles;
 use OxyArea\Roles\RoleAudienceProvider;
 use OxyArea\Roles\RoleManager;
+use OxyArea\Tools\Porter;
 
 /**
  * Builds the object graph and registers the hooks.
@@ -239,6 +243,26 @@ final class Plugin {
 	 * Service identifier of the roles screen.
 	 */
 	public const ROLES_SCREEN = 'admin.roles';
+
+	/**
+	 * Service identifier of the import and export service.
+	 */
+	public const PORTER = 'tools.porter';
+
+	/**
+	 * Service identifier of the settings screen.
+	 */
+	public const SETTINGS_SCREEN = 'admin.settings';
+
+	/**
+	 * Service identifier of the tools screen.
+	 */
+	public const TOOLS_SCREEN = 'admin.tools';
+
+	/**
+	 * Service identifier of the setup wizard.
+	 */
+	public const WIZARD = 'admin.wizard';
 
 	/**
 	 * Service identifier of the admin menu.
@@ -561,11 +585,46 @@ final class Plugin {
 			);
 
 			$container->set(
+				self::PORTER,
+				static fn ( Container $c ): Porter => new Porter(
+					$c->get_typed( self::SETTINGS, Settings::class ),
+					$c->get_typed( self::REDIRECT_RULES, RuleRepositoryInterface::class ),
+					$c->get_typed( self::DASHBOARDS, DashboardRepository::class )
+				)
+			);
+
+			$container->set(
+				self::SETTINGS_SCREEN,
+				static fn ( Container $c ): SettingsScreen => new SettingsScreen(
+					$c->get_typed( self::SETTINGS, Settings::class )
+				)
+			);
+
+			$container->set(
+				self::TOOLS_SCREEN,
+				static fn ( Container $c ): ToolsScreen => new ToolsScreen(
+					$c->get_typed( self::PORTER, Porter::class )
+				)
+			);
+
+			$container->set(
+				self::WIZARD,
+				static fn ( Container $c ): Wizard => new Wizard(
+					$c->get_typed( self::ROLE_MANAGER, RoleManager::class ),
+					$c->get_typed( self::REDIRECT_RULES, RuleRepositoryInterface::class ),
+					$c->get_typed( self::SETTINGS, Settings::class )
+				)
+			);
+
+			$container->set(
 				self::MENU,
 				static fn ( Container $c ): Menu => new Menu(
 					$c->get_typed( self::ROLES_SCREEN, RolesScreen::class ),
 					$c->get_typed( self::REDIRECTS_SCREEN, RedirectsScreen::class ),
-					$c->get_typed( self::DASHBOARD_PREVIEW, DashboardPreviewScreen::class )
+					$c->get_typed( self::DASHBOARD_PREVIEW, DashboardPreviewScreen::class ),
+					$c->get_typed( self::SETTINGS_SCREEN, SettingsScreen::class ),
+					$c->get_typed( self::TOOLS_SCREEN, ToolsScreen::class ),
+					$c->get_typed( self::WIZARD, Wizard::class )
 				)
 			);
 		}
