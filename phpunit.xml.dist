@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    PHPUnit 9.6, and not 10, deliberately.
+
+    WordPress's own test library calls PHPUnit\Util\Test::parseTestMethodAnnotations(),
+    which PHPUnit 10 removed. Two runners in one project — 10 for the unit suite
+    and 9 for the integration one — would mean two configurations, two lock
+    files and two ways for a test to pass. One runner for everything is worth
+    more than anything 10 adds.
+-->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          colors="true"
          beStrictAboutOutputDuringTests="true"
          failOnWarning="true"
-         failOnNotice="true"
          failOnRisky="true"
-         failOnDeprecation="true"
-         cacheDirectory=".phpunit.cache">
+         cacheResultFile=".phpunit.cache/result.cache">
 
     <testsuites>
-        <!-- Pure PHP: no WordPress, no database. Runs anywhere. -->
+        <!-- Pure PHP: no WordPress, no database. Runs anywhere, in a moment. -->
         <testsuite name="unit">
             <directory>tests/Unit</directory>
         </testsuite>
-        <!-- Requires a WordPress test installation. -->
+        <!-- Needs WordPress and a database it is allowed to destroy. -->
         <testsuite name="integration">
             <directory>tests/Integration</directory>
         </testsuite>
@@ -25,9 +32,9 @@
         </testsuite>
     </testsuites>
 
-    <source>
+    <coverage>
         <include>
-            <directory>src</directory>
+            <directory suffix=".php">src</directory>
         </include>
-    </source>
+    </coverage>
 </phpunit>
