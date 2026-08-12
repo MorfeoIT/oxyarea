@@ -6,6 +6,47 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added — Sprint C, frontend authentication
+
+- Sign in, sign out, forgotten password, set a new password and edit your own
+  details. Five blocks and five shortcodes, with the same object behind both so
+  the two cannot drift apart.
+- Authentication is WordPress's throughout — `wp_signon`, `retrieve_password`,
+  `check_password_reset_key`, `reset_password`. Nothing here touches a hash.
+- `SafeRedirect`: a pure open-redirect guard with 33 tests of its own. A
+  whitelist rather than a blacklist — a root-relative path, or an absolute URL on
+  this host, and everything else becomes the fallback. It exists for a dull and
+  effective attack: a link to the genuine login form with a destination attached,
+  which signs somebody in and then lands them somewhere else with their guard
+  down. Sprint D's redirect engine will use the same guard.
+- **No account enumeration.** WordPress separates "unknown username" from "wrong
+  password", and its lost-password form says whether an address is known. On a
+  site whose purpose is telling customers apart, both answer the question of
+  whether a particular person is a customer of yours. Every failure now reads the
+  same, and the lost-password form gives the same answer and the same redirect
+  either way.
+- The reset link comes back to a page on the site instead of `wp-login.php`, when
+  a page has been chosen in the settings. With no page chosen WordPress behaves
+  exactly as it always has, which is the right default for a plugin that was
+  activated a minute ago and knows nothing about the site's pages.
+- Changing an email address or a password asks for the current password. Not
+  because the session is doubted, but because an unattended laptop is how
+  accounts are taken over in practice.
+- Templates are overridable from a theme, the way WooCommerce taught everybody to
+  expect: drop `oxyarea/auth/login.php` into a theme and own that form.
+- Accessibility: labelled fields, `role="alert"` on failures and `role="status"`
+  on confirmations, visible focus that a theme cannot remove, `autocomplete`
+  hints so password managers work, and no state signalled by colour alone.
+- **No JavaScript build step.** Blocks are registered from `block.json` on the
+  server, rendered in PHP, and the editor gets one hand-written ES5 file that
+  draws a labelled placeholder. The package ships the source that was written,
+  which is what the review guidelines ask for, reached by not creating the
+  problem. A live preview is deliberately absent: these are forms, and one that
+  half works in the editor invites somebody to type a password into it.
+- `scripts/testbed-login-flow.sh`: 15 checks over real HTTP — the page, the form,
+  the nonce, a refused password, a successful sign-in, the session cookie, and a
+  `redirect_to` pointing off-site that is not followed.
+
 ### Verified on a real WordPress
 
 First run on WordPress 7.0.3, on the test bed at `test.44123.it/oxyarea`. The

@@ -61,7 +61,26 @@ sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp config set WP_DEBUG_DISPLAY
 sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp config set SCRIPT_DEBUG true --raw"
 
 sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp option update blog_public 0"
-sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp rewrite structure '/%postname%/' --hard" || true
+sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp rewrite structure '/%postname%/'"
+
+# WP-CLI will not write this one: `wp rewrite --hard` needs configuration it does
+# not have for an install in a subdirectory, and says so in a warning that is easy
+# to read past. Without it every pretty permalink on the test bed is a 404, which
+# looks exactly like a plugin that renders nothing.
+cat > "${ROOT}/.htaccess" <<HTACCESS
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /${SITE}/
+RewriteRule ^index\\.php\$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /${SITE}/index.php [L]
+</IfModule>
+# END WordPress
+HTACCESS
+chown "${USERNAME}:${USERNAME}" "${ROOT}/.htaccess"
+chmod 644 "${ROOT}/.htaccess"
 
 sudo -u "${USERNAME}" -H bash -c "cd '${ROOT}' && wp plugin delete akismet hello" || true
 

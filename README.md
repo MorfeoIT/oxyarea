@@ -114,8 +114,9 @@ suspect. WP_DEBUG on, logging to file. The cast — alice, bob, carol — alread
 exists as users.
 
 ```bash
-scripts/testbed-setup.sh     # once, as root: database, WordPress, plugin-check, users
-scripts/testbed-deploy.sh    # each time, as root: unpack /tmp/oxyarea.tar and activate
+scripts/testbed-setup.sh        # once, as root: database, WordPress, plugin-check, users
+scripts/testbed-deploy.sh       # each time, as root: unpack /tmp/oxyarea.tar and activate
+scripts/testbed-login-flow.sh   # signs in over HTTP, the way a person would
 ```
 
 Build the package the way the directory will see it, `export-ignore` and all:
@@ -132,9 +133,15 @@ wp eval-file tests/manual/smoke.php
 ```
 
 `tests/manual/smoke.php` exercises what only exists inside WordPress — the role
-manager's refusals, the escalation guard, the assignment repository and the
-resolver wired to real roles — and cleans up after itself. It is not PHPUnit; it
-is what covers those classes until the integration suite exists.
+manager's refusals, the escalation guard, the assignment repository, the resolver
+wired to real roles, and the authentication forms — and cleans up after itself.
+It is not PHPUnit; it is what covers those classes until the integration suite
+exists.
+
+`scripts/testbed-login-flow.sh` is the only check that goes through HTTP: a real
+page, a real form, a real nonce, a real session cookie. Everything else proves
+the pieces work; this proves the flow does. It is what would notice a form that
+renders perfectly and submits into nothing.
 
 **Never point the WordPress PHPUnit test library at a site's database.** It drops
 and recreates every table on each run. It needs a database of its own.
@@ -148,13 +155,18 @@ Sprint B complete: the access resolver, the audience model, the assignment
 repository, the role manager with its refusals, the capability catalogue and the
 Roles screen. 87 unit tests; `php -l`, PHPCS, PHPStan level 8 all clean.
 
-Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
-**Plugin Check reports no errors**, 87 unit tests pass and the 34 checks in
-`tests/manual/smoke.php` pass inside a real installation.
+Sprint C complete: frontend sign in, sign out, forgotten password, set a new
+password and profile, as five blocks and five shortcodes, with the open-redirect
+guard and the account-enumeration fixes behind them.
 
-Next: Sprint C — frontend authentication. Login, logout, password reset and
-profile, as blocks and shortcodes.
+Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
+**Plugin Check reports no errors**, 120 unit tests pass, the 61 checks in
+`tests/manual/smoke.php` pass inside a real installation, and the 15 checks in
+`scripts/testbed-login-flow.sh` pass over HTTP.
+
+Next: Sprint D — the redirect engine. Role rules, a deterministic priority, and
+the conflict cases.
 
 Still outstanding: the PHPUnit `integration` and `security` suites are empty. The
-manual smoke script covers the same ground for now, but it is a script with a
-pass counter, not a test suite, and it does not run in CI.
+manual scripts cover the same ground for now, but they are scripts with a pass
+counter, not test suites, and they do not run in CI.
