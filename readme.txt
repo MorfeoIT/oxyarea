@@ -81,6 +81,16 @@ No. The free plugin contacts no external service and sends no telemetry.
 Nothing is removed unless you first turn on "delete data on uninstall". Switching
 the plugin off removes nothing at all.
 
+== Screenshots ==
+
+1. The private area a customer sees after signing in. One template serves everybody who holds the role.
+2. Sign in, and ask for a new password, on a page of your own site rather than wp-login.php.
+3. Roles: create them, see who holds them, and edit what they may do without a second plugin.
+4. Redirects, with the question a support ticket actually asks — where does each role land after signing in, and which rule decided it.
+5. A dashboard built in the block editor, with the audience chosen beside it.
+6. The preview: what a role gets, without signing in as anybody.
+7. Settings. Five of them, and the only one that can lose work says so plainly.
+
 == Changelog ==
 
 = 0.1.0 =

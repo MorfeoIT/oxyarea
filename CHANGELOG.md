@@ -8,6 +8,29 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ### Fixed
 
+- **The sign-in button had no words on it.** Every `block.json` declares its text
+  attributes with a default of `""`, so the attribute always arrives — as an
+  empty string — and a null-coalescing fallback never fires against that. The
+  sign-in, sign-out, forgotten-password and profile buttons all rendered as empty
+  boxes. It reached the front end and survived seven sprints: every check asked
+  whether the button was there, none asked what it said. It took looking at a
+  screenshot. The flow test now reads the label.
+- The editor placeholder showed a block's slug where its `block.json` gives it a
+  title, so "Account summary" read as `profile-summary`.
+
+### Added
+
+- Seven screenshots in `.wordpress-org/`, with captions in `readme.txt`. Taken
+  from a real installation by `scripts/screenshots.mjs`, which drives a headless
+  browser as three different people — an administrator, a customer and a stranger
+  — so they cannot drift from what the plugin actually does.
+- `scripts/testbed-screenshot-seed.php`, which fills the test bed with the roles,
+  rules, dashboards and restricted post worth photographing, and takes them all
+  out again afterwards. Screenshots of an empty plugin persuade nobody and are
+  honest about nothing.
+
+### Fixed
+
 - **Forms redirected to the site's front page instead of back to themselves.**
   `Form::current_url()` read `WP::$request`, which is empty where it was called:
   forms are handled on `init`, and WordPress does not work out which page was

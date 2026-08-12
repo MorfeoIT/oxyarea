@@ -123,6 +123,16 @@ scripts/testbed-redirect-flow.sh   # checks where the browser is actually sent
 scripts/testbed-dashboard-flow.sh  # checks a dashboard reaches the right browser
 scripts/testbed-restriction-flow.sh # the release blockers: search, feed, REST, sitemap
 scripts/testbed-reset-flow.sh       # forgotten password, from the email to signing in
+scripts/testbed-screenshot-seed.php # fills the bed with roles, rules and dashboards
+scripts/screenshots.mjs             # photographs seven screens as three different people
+```
+
+The screenshots need `npm install puppeteer` somewhere and three credentials in
+the environment; they are a release asset, so nothing about them is in
+`composer.json` or shipped:
+
+```bash
+OXYAREA_BASIC=user:pass OXYAREA_ADMIN=user:pass OXYAREA_CUSTOMER=user:pass   node scripts/screenshots.mjs .wordpress-org
 ```
 
 The reset flow needs `scripts/testbed-mail-capture.php` installed as an
@@ -194,9 +204,8 @@ asked as a stranger and then as each of two customers, and the forgotten-passwor
 flow from the email to signing in with the new password.
 
 **Read [`docs/SUBMISSION_READINESS.md`](docs/SUBMISSION_READINESS.md) before
-submitting.** Two things are outstanding and neither is code: the Name Lock
-checklist has a manual trademark step nobody has done, and the readme has no
-screenshots.
+submitting.** One thing is outstanding and it is not code: the Name Lock
+checklist has a manual trademark similarity step nobody has done.
 
 PRO begins only after that, as the master prompt requires.
 

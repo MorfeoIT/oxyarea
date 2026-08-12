@@ -4,8 +4,8 @@
 **Assessed:** 12 August 2026
 **Assessed against:** WordPress 7.0.3, PHP 8.3.33, on the test bed at
 `test.44123.it/oxyarea`
-**Verdict:** the code is ready to submit. **Two things are not, and neither is
-code.** They are listed under "Before submitting".
+**Verdict:** the code is ready to submit. **One thing is not, and it is not
+code:** the manual trademark similarity check. See "Before submitting".
 
 *Updated 12 August 2026, later the same day: the password reset flow has now been
 run end to end, and so has profile editing. Doing so found a real bug — see §5.*
@@ -83,6 +83,7 @@ looked for rather than assumed absent.
 | GPL-compatible | GPL-2.0-or-later, declared in the header, `readme.txt` and `composer.json` |
 | Human-readable source | No build step. The JavaScript shipped is the JavaScript written; there is no bundle, no minification and no `vendor/` |
 | Translation-ready | 274 strings, one text domain, `languages/oxyarea.pot` generated with `wp i18n make-pot` |
+| Screenshots | Seven, in `.wordpress-org/`, with captions in `readme.txt`. Taken from a real installation by `scripts/screenshots.mjs` rather than mocked up, so they cannot drift from what the plugin does |
 | No undocumented external services | The plugin contacts nothing at all |
 | No unsolicited tracking | None |
 | Correct headers | Name, URI, description, version, requires, author, licence, text domain, domain path |
@@ -129,15 +130,12 @@ Written plainly, because an unverified thing is not a working thing.
 
 ## 7. Before submitting
 
-Two things, neither of them code:
+One thing, and it is not code:
 
 1. **Complete the Name Lock checklist** in `docs/00_NAMING_CLEARANCE.md` §10. Four
    of its seven boxes are ticked by the indexed searches recorded there; the
    direct EUIPO / TMview / WIPO similarity check is a manual step nobody has done,
    and the slug is only really settled by approval itself.
-2. **Add screenshots and the `Screenshots` section to `readme.txt`.** Not required
-   for acceptance, and the first thing anybody reads on the directory page.
-
 Then submit. The slug becomes real on approval, and the branding strings are
 centralised in `Brand` precisely so that a pre-launch rename would still be cheap
 if it came to that.
