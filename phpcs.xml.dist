@@ -53,6 +53,15 @@
     <rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
         <exclude-pattern>src/Access/*</exclude-pattern>
         <exclude-pattern>src/Infrastructure/Container.php</exclude-pattern>
+        <!--
+            RoleManager's messages are different: they are read by an
+            administrator, so they are translated. They are deliberately *not*
+            escaped where they are thrown, because the screen escapes them where
+            it prints them. Escaping at both ends is what turns a quotation mark
+            into &amp;quot; on somebody's screen, and the boundary that knows it is
+            emitting HTML is the one that should do the escaping.
+        -->
+        <exclude-pattern>src/Roles/RoleManager.php</exclude-pattern>
     </rule>
 
     <!--
