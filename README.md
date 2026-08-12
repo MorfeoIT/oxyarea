@@ -34,7 +34,8 @@ src/
   Admin/                 the admin menu and its screens
   Dashboard/             the widget contract
   Infrastructure/        container, settings, migrations, activation, branding
-  Persistence/           the rules, in the database
+  Persistence/           assignments and redirect rules, in the database
+  Redirect/              where people go next — framework-free, unit-testable
   Privacy/               suggested privacy policy text
   Roles/                 role manager, capability catalogue, audience provider
 tests/
@@ -114,9 +115,10 @@ suspect. WP_DEBUG on, logging to file. The cast — alice, bob, carol — alread
 exists as users.
 
 ```bash
-scripts/testbed-setup.sh        # once, as root: database, WordPress, plugin-check, users
-scripts/testbed-deploy.sh       # each time, as root: unpack /tmp/oxyarea.tar and activate
-scripts/testbed-login-flow.sh   # signs in over HTTP, the way a person would
+scripts/testbed-setup.sh           # once, as root: database, WordPress, plugin-check, users
+scripts/testbed-deploy.sh          # each time, as root: unpack /tmp/oxyarea.tar and activate
+scripts/testbed-login-flow.sh      # signs in over HTTP, the way a person would
+scripts/testbed-redirect-flow.sh   # checks where the browser is actually sent
 ```
 
 Build the package the way the directory will see it, `export-ignore` and all:
@@ -153,19 +155,23 @@ settings, activation/deactivation, uninstall, privacy text, access contracts.
 
 Sprint B complete: the access resolver, the audience model, the assignment
 repository, the role manager with its refusals, the capability catalogue and the
-Roles screen. 87 unit tests; `php -l`, PHPCS, PHPStan level 8 all clean.
+Roles screen.
 
 Sprint C complete: frontend sign in, sign out, forgotten password, set a new
 password and profile, as five blocks and five shortcodes, with the open-redirect
 guard and the account-enumeration fixes behind them.
 
-Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
-**Plugin Check reports no errors**, 120 unit tests pass, the 61 checks in
-`tests/manual/smoke.php` pass inside a real installation, and the 15 checks in
-`scripts/testbed-login-flow.sh` pass over HTTP.
+Sprint D complete: the redirect engine. Rules by role for signing in, signing
+out, registering and resetting a password; a fallback per event; and an ordering
+that is total rather than usually right.
 
-Next: Sprint D — the redirect engine. Role rules, a deterministic priority, and
-the conflict cases.
+Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
+**Plugin Check reports no errors**, 157 unit tests pass, the 73 checks in
+`tests/manual/smoke.php` pass inside a real installation, and the 21 checks in
+the two flow scripts pass over HTTP.
+
+Next: Sprint E — dashboards. The dashboard model, resolution by role, the blocks
+and the preview.
 
 Still outstanding: the PHPUnit `integration` and `security` suites are empty. The
 manual scripts cover the same ground for now, but they are scripts with a pass

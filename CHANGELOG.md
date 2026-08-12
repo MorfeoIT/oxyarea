@@ -6,6 +6,50 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added — Sprint D, the redirect engine
+
+- Rules by role for four moments: signing in, signing out, registering and
+  setting a new password. Each moment also takes a fallback rule, stored as a row
+  like any other so that turning it off and reordering it work the same way.
+- **A total ordering**, applied in this sequence:
+  1. *Specificity.* A rule about a role beats one about everybody signed in,
+     which beats the event's fallback. First, because it is what a site owner
+     means: writing "agents go to the agent dashboard" alongside "everybody goes
+     to the shop" should not require discovering a priority field.
+  2. *Priority*, lower first, as with a WordPress hook. This settles two rules of
+     equal specificity, which is the ordinary case of somebody holding two roles
+     and the reason the field exists.
+  3. *Age*, oldest first. Not because the older rule deserves it, but because
+     something has to decide, and a tie broken by whatever order the database
+     felt like returning is a bug that appears fortnightly and never reproduces.
+- The engine is pure and WordPress-free, like the access resolver, with 37 tests
+  over the conflicts.
+- Every destination leaves through the guard written in Sprint C, whether it came
+  from a rule, a request or a filter. A rule pointing at another site is refused
+  where it is written, rather than silently ignored where it is used.
+- Both sets of hooks: WordPress's `login_redirect`, `logout_redirect` and
+  `registration_redirect`, so somebody who reached wp-login.php directly is
+  governed too, and OxyArea's own filters, so the frontend forms use the same
+  engine rather than a second copy of the idea.
+- Registration matches against the role the site gives new accounts, which is the
+  only thing actually known at that moment.
+- An optional setting keeps people who cannot write posts out of wp-admin,
+  sending them wherever their sign-in rule points.
+- The Redirects screen shows where every role currently lands, worked out with
+  the same engine that will decide it for real, and says when more than one rule
+  matched. The ordering being documented does not help somebody staring at four
+  rules wondering why a customer keeps arriving at the shop.
+- `scripts/testbed-redirect-flow.sh`: the rule, the sign-in, and the Location
+  header the browser actually receives.
+
+### Fixed
+
+- The frontend sign-in form overrode an explicit `redirect_to` with the matching
+  rule, while WordPress's own `login_redirect` deferred to it: two answers to the
+  same question, and which one applied depended on which form was used. Found by
+  the HTTP flow test and by nothing else, being an interaction between two layers
+  that only meet in a real request.
+
 ### Added — Sprint C, frontend authentication
 
 - Sign in, sign out, forgotten password, set a new password and edit your own
