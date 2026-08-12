@@ -132,4 +132,37 @@ final class Container {
 
 		return $service;
 	}
+
+	/**
+	 * Get a service and insist on what it is.
+	 *
+	 * Since get() can only promise an object, every call site that wants a
+	 * particular type has to prove it. Doing that here once keeps the proof in
+	 * one place and lets static analysis check the whole object graph, including
+	 * the moment an add-on replaces a service with something that does not fit.
+	 *
+	 * @template T of object
+	 *
+	 * @param string          $id         Service identifier.
+	 * @param class-string<T> $class_name The class or interface it must satisfy.
+	 * @return T
+	 *
+	 * @throws ContainerException If the service is not of the expected type.
+	 */
+	public function get_typed( string $id, string $class_name ): object {
+		$service = $this->get( $id );
+
+		if ( ! $service instanceof $class_name ) {
+			throw new ContainerException(
+				sprintf(
+					'The OxyArea service "%s" should be a %s but is a %s.',
+					$id,
+					$class_name,
+					get_class( $service )
+				)
+			);
+		}
+
+		return $service;
+	}
 }

@@ -6,6 +6,49 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added — Sprint B, authorisation and roles
+
+- **The access resolver.** One class decides who may see what, and it contains no
+  WordPress call at all: the rules, the subjects, whether the user administers
+  the plugin and what time it is all arrive through the constructor. That is what
+  makes it possible to test every branch of the authorisation logic rather than
+  assert that it looks right.
+- Its rules, in order: somebody who administers OxyArea may read what OxyArea
+  protects; a rule outside its validity period does not count; an explicit deny
+  beats every allow; one matching subject out of several is enough; anything else
+  is a refusal, including a resource with no rules at all.
+- `Assignment`, the stored rule: a subject, an effect, a priority and an optional
+  window. A window that ends before it starts never applies, because the safe
+  reading of corrupt data in an access rule is that it grants nothing.
+- `AudienceResolver`, which asks every registered provider what a user counts as
+  and merges the answers, collapsing duplicates and caching per request.
+- `RoleAudienceProvider`: signed in or not, plus every role held. A signed-out
+  visitor presents "anonymous" and nothing else — it is a distinct audience, not
+  a synonym for everybody.
+- `HookedAccessResolver`, a thin wrapper carrying the `oxyarea_access_decision`
+  filter, so the resolver itself stays free of WordPress. A filter returning
+  anything that is not a Decision is ignored rather than trusted.
+- `AssignmentRepository`, reading and writing the assignments table with prepared
+  values and a per-request cache, skipping rows it cannot make sense of and
+  refusing to trust the shape of what a shared object cache hands back.
+- **The role manager**, with the refusals that matter: nobody edits the
+  administrator role; nobody deletes a role OxyArea did not create; nobody grants
+  a capability they do not hold themselves; nobody edits themselves out of the
+  role screen; and capabilities outside the catalogue are left untouched, so a
+  role carrying WooCommerce's capabilities still carries them afterwards.
+- `CapabilityCatalogue`, which separates everyday capabilities from the ones that
+  hand over the site, and treats any capability it has never heard of as
+  dangerous.
+- The Roles admin screen: list, create, clone the capabilities of an existing
+  role, edit capabilities by group, assign a user, and delete with reassignment.
+  Forms post to admin-post.php, so nothing mutates on a GET.
+- `Container::get_typed()`, so the object graph is checked by static analysis
+  rather than hoped about.
+- 54 further unit tests, including the case that found a real hole: the resolver
+  trusted its manager check for signed-out visitors, which would have handed
+  every protected resource to the open internet had an add-on shipped a careless
+  implementation. The guard now lives in the resolver.
+
 ### Added — Sprint A, foundation
 
 - Plugin bootstrap: headers, constants, PSR-4 autoloader and a requirements
@@ -39,6 +82,8 @@ All notable changes to OxyArea are recorded here. The format follows
   PHPUnit with unit, integration and security suites.
 - 33 unit tests over the container, decisions, subjects, resources and settings
   sanitisation.
+- Fixed before anything else ran: the migration list used `fn (): void`, which
+  cannot compile, and would have white-screened the plugin on activation.
 
 ### Notes
 

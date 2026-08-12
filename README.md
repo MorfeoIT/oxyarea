@@ -31,16 +31,39 @@ uninstall.php            runs outside the plugin; destroys nothing by default
 src/
   Plugin.php             builds the object graph, fires oxyarea_register_services
   Access/                who may see what — framework-free, unit-testable
+  Admin/                 the admin menu and its screens
   Dashboard/             the widget contract
   Infrastructure/        container, settings, migrations, activation, branding
+  Persistence/           the rules, in the database
   Privacy/               suggested privacy policy text
-  Roles/                 the plugin's own administrative capabilities
+  Roles/                 role manager, capability catalogue, audience provider
 tests/
   Unit/                  no WordPress, no database, runs anywhere
+  Support/               test doubles: in-memory rules, stub audience, fixed clock
   Integration/           needs a WordPress test install
   Security/              the Alice/Bob isolation suite
 .wordpress-org/          directory assets: icons, banners, screenshots
 ```
+
+## How a decision is made
+
+```
+AccessResolver::explain( user, resource )
+  │
+  ├─ administers OxyArea?          → allow, and say so
+  ├─ AudienceResolver              → what the user counts as
+  │    └─ RoleAudienceProvider     → anonymous | authenticated + roles
+  │       (PRO adds: the user, their companies, their capabilities)
+  ├─ AssignmentRepository          → the rules on this resource
+  │    └─ drop the ones outside their window
+  ├─ any matching deny             → refuse
+  ├─ any matching allow            → permit
+  └─ otherwise                     → refuse
+```
+
+`Decision` carries the reasoning as well as the verdict, and `can_view()` is
+`explain()->is_allowed()`. There is no second code path, which is what will let
+PRO's permission inspector show the decision the site actually made.
 
 ## Commands
 
@@ -85,7 +108,16 @@ through REST, AJAX, search, a feed, the sitemap or a static file URL.
 ## Status
 
 Sprint A complete: bootstrap, container, schema migrations, capabilities,
-settings, activation/deactivation, uninstall, privacy text, access contracts and
-the unit suite around them.
+settings, activation/deactivation, uninstall, privacy text, access contracts.
 
-Next: Sprint B — the access resolver itself, the role manager and its screens.
+Sprint B complete: the access resolver, the audience model, the assignment
+repository, the role manager with its refusals, the capability catalogue and the
+Roles screen. 87 unit tests; `php -l`, PHPCS, PHPStan level 8 all clean.
+
+Next: Sprint C — frontend authentication. Login, logout, password reset and
+profile, as blocks and shortcodes.
+
+The integration and security suites are still empty: they need a WordPress test
+installation, which this machine does not have yet. Everything above is verified
+by the unit suite and static analysis, and nothing in it has run inside a real
+WordPress.
