@@ -180,10 +180,23 @@ knows how to do.
 
 One thing, and it is not code:
 
-1. **Complete the Name Lock checklist** in `docs/00_NAMING_CLEARANCE.md` §10. Four
-   of its seven boxes are ticked by the indexed searches recorded there; the
-   direct EUIPO / TMview / WIPO similarity check is a manual step nobody has done,
-   and the slug is only really settled by approval itself.
+1. **Complete the Name Lock checklist** in `docs/00_NAMING_CLEARANCE.md` §10.
+   Attempted on 2026-08-12, and §9b records the outcome in full. In short: the
+   Italian register (UIBM) was searched directly and is clean for `oxyarea`,
+   `oxiarea` and `oxysoft`, against working controls. EUIPO, TMview and WIPO are
+   closed to scripted access by design — TMview requires a captcha-validated
+   session, WIPO a proof-of-work challenge — so that part needs a person at a
+   browser or a professional, and the box stays unticked.
+
+   §9b also records something the checklist did not anticipate and which matters
+   more than any register entry found so far: Soflyy's published trademark
+   policy for the Oxygen page builder says, verbatim, **"Do not use 'oxygen' or
+   'oxy' in product names."** No registered Soflyy mark could be found, so this
+   is a private policy rather than a right — but WordPress.org acts on trademark
+   complaints and the slug cannot be changed after approval, which makes the
+   exposure asymmetric. It applies to the whole OxyWP family, not to this plugin
+   alone. That is a commercial decision to take before submitting, not a defect
+   to fix.
 Then submit. The slug becomes real on approval, and the branding strings are
 centralised in `Brand` precisely so that a pre-launch rename would still be cheap
 if it came to that.

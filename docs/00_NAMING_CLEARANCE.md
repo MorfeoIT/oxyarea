@@ -173,14 +173,115 @@ Correct strategy:
 4. On approval, the slug becomes the real product slug.
 5. Continue PRO development afterward.
 
+## 9b. Register check, 2026-08-12 — what was done and what was found
+
+The Name Lock's fourth box asked for a direct check against the trademark
+registers. Here is what came of attempting it, in full, because half of it is a
+negative result about the method rather than about the name.
+
+### What could be checked
+
+**UIBM, the Italian register** — searched directly, and it answered.
+
+| Query | Field | Result |
+|---|---|---|
+| `oxyarea` | title/denomination | no results |
+| `oxyarea` | title and description | no results |
+| `oxiarea` | title/denomination | no results |
+| `oxysoft` | title/denomination | no results |
+| `ferrari` (control) | title/denomination | results — the search works |
+| `oxygen` (control) | title/denomination | results — the search works |
+
+The controls matter. A register that answers "nothing found" to a malformed
+query looks exactly like a register that answers "nothing found" to a clean one,
+and only a term that must return something tells the two apart.
+
+Worth noting in passing: `oxysoft` returns nothing either. The company name is
+not a registered mark in Italy.
+
+**WordPress.org** — the slug `oxyarea` is unclaimed (the plugin information API
+returns "Plugin not found"). A search for `oxy` across the whole directory
+returns **four** plugins whose name begins with Oxy, the largest at 500 active
+installs, and one of them — `oxy-relogin-window` — has nothing to do with
+Oxygen. So the directory has approved an unrelated Oxy-prefixed name before.
+That is a precedent, not a permission.
+
+**Indexed search** — no trademark called OxyArea surfaces anywhere, in any
+jurisdiction, under any spelling tried.
+
+### What could not be checked, and why it is not a matter of trying harder
+
+TMview, EUIPO eSearch and the WIPO Global Brand Database were all unreachable
+by script. Not slow, not awkward — deliberately closed:
+
+- TMview resets the connection on every API path, and its own client code
+  contains the string `Captcha could not be verified successfully`, so a
+  captcha-validated session is required before a search is answered at all.
+- WIPO's Global Brand Database serves a proof-of-work challenge (altcha) and
+  falls through to its front-end shell for every API path tried.
+- The third-party mirrors that index the same data — Justia, uspto.report —
+  are behind Cloudflare.
+
+These are the three registers the checklist names. **The box stays unticked.**
+Completing it needs a person at a browser for fifteen minutes, or a
+professional. The searches to run are: `oxyarea`, `oxy area`, `oxiarea`,
+`oxyarea` as a phonetic/fuzzy search, in classes **9** (software) and **42**
+(software as a service), across EUIPO, WIPO and TMview's participating offices.
+
+### The finding that matters, and it is not about OxyArea
+
+Soflyy, who make the Oxygen page builder for WordPress, publish a trademark
+policy at `oxygenbuilder.com/brand/`. It says, verbatim:
+
+> Do not use "oxygen" or "oxy" in product names.
+
+and, of the WordPress Foundation's trademark policy:
+
+> WE WILL ENFORCE THE EXACT SAME POLICY.
+
+Read carefully, three things are true at once.
+
+**It is a private policy, not a law.** No registered "Oxygen" mark belonging to
+Soflyy could be found; the registered OXYGEN in class 9 (USPTO 87799894) belongs
+to Oxygen, Inc., a fintech, and is unrelated to both parties.
+
+**It is nevertheless the sharpest risk this name carries**, because of where it
+would land. WordPress.org's review team acts on trademark complaints, and the
+slug cannot be changed after approval. The exposure is asymmetric: a complaint
+costs Soflyy an email and costs us the name.
+
+**It applies to the whole family, not to this plugin.** OxyProfit, OxyArea,
+OxyWait and `oxywp.com` all share the prefix. A decision here is a decision
+about all of them.
+
+Against that, the case for keeping the name is not weak:
+
+- "Oxy" here is the stem of **Oxysoft**, the company's own name. That is a
+  materially different position from a third party choosing "Oxy" because
+  Oxygen is popular.
+- OxyArea is not an Oxygen addon and does not present itself as one. The
+  WordPress Foundation policy that Soflyy adopts is aimed at products that
+  trade on a mark; the concern it exists to address is not present here.
+- The policy's softer sentence — "use of 'oxy' is also discouraged but not
+  expressly prohibited" — is about top-level domains, and `oxywp.com` already
+  exists.
+
+**This is a commercial judgement, not a technical one, and it is not the
+author's to make.** What has changed is that the risk now has a name and an
+address instead of being an unknown register entry.
+
 ## 10. NAME_LOCK gate
 
 Set `NAME_LOCKED = true` only when all items are true:
 
-- [ ] Exact WordPress.org collision search clean.
-- [ ] Exact general software search clean.
-- [ ] GitHub/package ecosystem search clean.
-- [ ] Direct EUIPO/TMview/UIBM/WIPO similarity check completed.
+- [x] Exact WordPress.org collision search clean. Slug `oxyarea` unclaimed;
+      four Oxy-prefixed plugins exist, none in this product's space (§9b).
+- [x] Exact general software search clean.
+- [x] GitHub/package ecosystem search clean.
+- [ ] Direct EUIPO/TMview/UIBM/WIPO similarity check completed. **UIBM done and
+      clean; EUIPO, TMview and WIPO are closed to scripted access and remain
+      outstanding — see §9b.** Read §9b before ticking this: it also records a
+      separate and larger question, Soflyy's "do not use oxy in product names".
 - [ ] OxyArea product page structure confirmed under `oxywp.com`.
 - [ ] OxyArea FREE MVP accepted by WordPress.org with desired slug `oxyarea`.
 - [ ] Optional but recommended: trademark filing decision taken before substantial marketing spend.
