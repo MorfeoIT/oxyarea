@@ -30,7 +30,11 @@
 	 */
 	function placeholder( note ) {
 		return function ( props ) {
-			var name = props.name.replace( 'oxyarea/', '' );
+			// The title registered from block.json, so the editor shows "Account
+			// summary" rather than "profile-summary". It is translated once, in
+			// PHP, and read back here.
+			var type = blocks.getBlockType( props.name );
+			var name = type && type.title ? type.title : props.name.replace( 'oxyarea/', '' );
 
 			return el(
 				'div',

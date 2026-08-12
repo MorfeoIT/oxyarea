@@ -52,7 +52,17 @@ const SHOTS = [
 	{ n: 2, as: 'anonymous', url: '/sign-in/', wait: '.oxyarea-form--login' },
 	{ n: 3, as: 'admin', url: '/wp-admin/admin.php?page=oxyarea', wait: '.wp-list-table' },
 	{ n: 4, as: 'admin', url: '/wp-admin/admin.php?page=oxyarea-redirects', wait: '.wp-list-table' },
-	{ n: 5, as: 'admin', url: '/wp-admin/edit.php?post_type=oxyarea_dashboard', wait: '.wp-list-table' },
+	{
+		n: 5,
+		as: 'admin',
+		url: '/wp-admin/edit.php?post_type=oxyarea_dashboard',
+		// The list of dashboards is a WordPress table and says nothing about this
+		// plugin. What is worth showing is a dashboard open in the block editor
+		// with the audience box beside it, which is the whole idea in one picture.
+		then: 'open-first-dashboard',
+		// The canvas lives in an iframe, so wait for something in the top document.
+		wait: '.interface-interface-skeleton',
+	},
 	{ n: 6, as: 'admin', url: '/wp-admin/admin.php?page=oxyarea-dashboard-preview&oxyarea_role=customer', wait: '.oxyarea-preview' },
 	{ n: 7, as: 'admin', url: '/wp-admin/admin.php?page=oxyarea-settings', wait: '.form-table' },
 ];
@@ -117,6 +127,7 @@ async function signInAsCustomer( page ) {
  */
 async function dismissOverlays( page ) {
 	const closers = [
+		'.components-guide__close-button',
 		'.components-modal__header button[aria-label]',
 		'.edit-post-welcome-guide button[aria-label]',
 		'.notice-dismiss',
@@ -159,6 +170,24 @@ for ( const shot of SHOTS ) {
 	const file = path.join( OUT, `screenshot-${ shot.n }.png` );
 
 	await page.goto( `${ SITE }${ shot.url }`, { waitUntil: 'networkidle2' } );
+
+	if ( 'open-first-dashboard' === shot.then ) {
+		// domcontentloaded, not networkidle: the block editor never stops talking
+		// to the server, so waiting for the network to go quiet waits for ever.
+		await Promise.all( [
+			page.waitForNavigation( { waitUntil: 'domcontentloaded' } ),
+			page.click( '.wp-list-table .row-title' ),
+		] );
+
+		await page.waitForSelector( '.interface-interface-skeleton', { timeout: 30000 } ).catch( () => {} );
+
+		// The editor paints in stages, and the welcome guide arrives after the
+		// canvas does.
+		await settle( 3000 );
+		await dismissOverlays( page );
+		await settle( 1500 );
+	}
+
 	await dismissOverlays( page );
 
 	// WordPress's own toolbar belongs to WordPress, not to this plugin, and a

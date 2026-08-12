@@ -71,12 +71,38 @@ if ( '1' !== (string) getenv( 'OXYAREA_SEED' ) ) {
 	}
 
 	$oxyarea_settings->update( array( 'login_page' => 0 ) );
+	delete_option( 'oxyarea_setup_done' );
 	$oxyarea_dashboards->flush();
 
 	echo "cleared\n";
 
 	return;
 }
+
+// The preview fills the placeholders with the administrator's own details and
+// says so. An administrator with no first name makes "Welcome back, ." — correct
+// behaviour that reads like a defect in a screenshot.
+wp_update_user(
+	array(
+		'ID'           => (int) $oxyarea_admin->ID,
+		'first_name'   => 'Marco',
+		'last_name'    => 'Bianchi',
+		'display_name' => 'Marco Bianchi',
+	)
+);
+
+// The editor's welcome guide is shown once per person and lands in the middle of
+// any screenshot of the editor. Turning it off for this account is a test-bed
+// preference, not a plugin behaviour.
+update_user_meta(
+	(int) $oxyarea_admin->ID,
+	'wp_persisted_preferences',
+	array(
+		'_modified'      => gmdate( 'c' ),
+		'core/edit-post' => array( 'welcomeGuide' => false ),
+		'core'           => array( 'welcomeGuide' => false ),
+	)
+);
 
 // --- roles ------------------------------------------------------------------
 
@@ -185,7 +211,7 @@ oxyarea_seed_dashboard(
 
 // --- redirect rules ---------------------------------------------------------
 
-$oxyarea_rules->save( new RedirectRule( RedirectEvent::LOGIN, null, '/my-area/', 50 ) );
+$oxyarea_rules->save( new RedirectRule( RedirectEvent::LOGIN, null, '/', 50 ) );
 $oxyarea_rules->save( new RedirectRule( RedirectEvent::LOGIN, Subject::role( 'customer' ), '/my-area/', 10 ) );
 $oxyarea_rules->save( new RedirectRule( RedirectEvent::LOGIN, Subject::role( 'agent' ), '/my-area/', 5 ) );
 $oxyarea_rules->save( new RedirectRule( RedirectEvent::LOGOUT, null, '/sign-in/', 10 ) );
@@ -208,6 +234,11 @@ $oxyarea_access->replace_for_resource(
 	ProtectedResource::post( (int) $oxyarea_contract ),
 	array( new Assignment( Subject::role( 'customer' ) ) )
 );
+
+// The wizard's invitation is for a plugin nobody has configured, and these
+// screenshots show one somebody has. Marking it done keeps the notice out of
+// every admin shot.
+update_option( 'oxyarea_setup_done', gmdate( 'c' ), false );
 
 $oxyarea_dashboards->flush();
 
