@@ -1,0 +1,28 @@
+{
+  "product": "OxyArea",
+  "display_name": "OxyArea – Private Client Area & User Portal",
+  "expected_slug": "oxyarea",
+  "vendor": "Oxysoft Soluzioni Informatiche",
+  "generated": "2026-08-11",
+  "free_plugin": "oxyarea",
+  "pro_plugin": "oxyarea-pro",
+  "documents": [
+    "00_NAMING_CLEARANCE.md",
+    "01_PRODUCT_BRIEF.md",
+    "02_FREE_PRO_STRATEGY.md",
+    "03_FUNCTIONAL_SPECIFICATION.md",
+    "04_TECHNICAL_ARCHITECTURE.md",
+    "05_PERMISSION_AND_SECURITY.md",
+    "06_UI_UX_FLOWS.md",
+    "07_TEST_PLAN.md",
+    "08_WORDPRESS_ORG_RELEASE.md",
+    "09_ROADMAP.md",
+    "AGENT_MASTER_PROMPT.md",
+    "README.md",
+    "SOURCES.md"
+  ],
+  "product_family": "OxyWP",
+  "product_site": "https://oxywp.com/oxyarea/",
+  "distribution_site": "https://oxywp.com/",
+  "dedicated_product_domain_required": false
+}

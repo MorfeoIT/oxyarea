@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<ruleset name="OxyArea">
+    <description>WordPress coding standards for OxyArea.</description>
+
+    <file>src</file>
+    <file>oxyarea.php</file>
+    <file>uninstall.php</file>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="ps"/>
+
+    <rule ref="WordPress">
+        <!-- src/ is PSR-4, which is what makes the plugin's own autoloader and
+             Composer's interchangeable. The WordPress one-class-per-
+             lowercase-file convention cannot apply to it. -->
+        <exclude name="WordPress.Files.FileName"/>
+    </rule>
+
+    <config name="minimum_wp_version" value="6.5"/>
+    <config name="testVersion" value="8.1-"/>
+
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="oxyarea"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- "oxyarea" is the plugin's public prefix for options, hooks, capabilities,
+         database tables and the REST namespace. The naming clearance rejects the
+         shorter "oxy_" precisely because four characters is the minimum the
+         wordpress.org guidelines consider unique, and "oxy" is not. -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="OxyArea"/>
+                <element value="oxyarea"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!--
+        The Access layer is framework-free PHP by design, which is what makes the
+        authorisation rules testable without a WordPress install. esc_html() does
+        not exist there, and these exception messages are developer-facing
+        strings that are never echoed to a browser.
+    -->
+    <rule ref="WordPress.Security.EscapeOutput.ExceptionNotEscaped">
+        <exclude-pattern>src/Access/*</exclude-pattern>
+        <exclude-pattern>src/Infrastructure/Container.php</exclude-pattern>
+    </rule>
+
+    <!--
+        This sniff compares a @param type against the PHP type hint and does not
+        understand PHPDoc generics, so it reports "list<Subject>" against "array"
+        as a mismatch. PHPStan checks the same thing properly at level 8.
+    -->
+    <rule ref="Squiz.Commenting.FunctionComment.IncorrectTypeHint">
+        <severity>0</severity>
+    </rule>
+</ruleset>
