@@ -113,20 +113,68 @@ about a mail server.
 
 Written plainly, because an unverified thing is not a working thing.
 
-1. **The PHPUnit `integration` and `security` suites are empty.** Their ground is
-   covered by `tests/manual/smoke.php` (109 checks) and the five flow scripts (70
-   checks), but those are scripts with a pass counter, not suites, and they do not
-   run in CI. Nothing regressed silently across seven sprints because they were run
-   by hand every time; that will not survive a second contributor.
-2. **The sitemap needs `blog_public` on to exist at all.** WordPress serves no
+1. **The sitemap needs `blog_public` on to exist at all.** WordPress serves no
    sitemap on a site set to discourage search engines, which the test bed is. The
    flow script turns it on for two checks and off again. Worth knowing, because
    without that the channel looks fine only because it is absent.
-3. **No rate limiting on sign-in.** The same as WordPress itself, and out of scope
+2. **No rate limiting on sign-in.** The same as WordPress itself, and out of scope
    in the specification, but more pointed on a site whose purpose is a private
    area. A decision to take, not a defect.
-4. **One person has reviewed this.** A security review by somebody who did not
-   write the code has not happened.
+3. **One person has reviewed this.** A security review by somebody who did not
+   write the code has not happened. The suites in §6b narrow what that review has
+   to take on trust; they do not replace it.
+
+## 6b. What the test suites now cover
+
+The `integration` and `security` suites were empty through all seven sprints,
+and the release gate was held up by scripts with a pass counter. It is now held
+up by 49 tests against a real WordPress and a real database, running on every
+push.
+
+| Suite | Tests | What it settles |
+|---|---|---|
+| `integration` — `HarnessTest` | 8 | That the harness works at all: WordPress up, plugin loaded through `plugins_loaded`, tables created, capabilities granted, each test rolled back. Without it a green suite could mean WordPress never started |
+| `integration` — `RoleManagerTest` | 17 | The refusals that need real roles: the administrator role untouchable, unmanaged roles undeletable, the escalation guard against four site-ending capabilities, cloning not a way around it, other plugins' capabilities surviving a save, deletion reassigning rather than stranding, the last administrator not demotable |
+| `security` — `ContentRestrictionTest` | 18 | The release blockers, asked all five ways WordPress lists content — search, feed, archive, sitemap, REST — as each of a stranger, a customer and a non-customer. REST answers 404 rather than 403, because 403 confirms the page is there |
+| `security` — `AccountPrivacyTest` | 6 | That a stranger cannot learn which email addresses are customers: a wrong password and an unknown account are refused in identical words, and destinations on other sites are refused |
+
+Three things are worth recording about how they were built.
+
+The suites are pinned to **PHPUnit 9.6**, not 10. WordPress's own test library
+calls `PHPUnit\Util\Test::parseTestMethodAnnotations()`, which 10 removed, so 10
+cannot run them at all.
+
+The bootstrap keys off `WP_PHPUNIT__TESTS_CONFIG` rather than the
+obvious-looking `WP_PHPUNIT__DIR`, because `wp-phpunit` sets the latter itself
+from a Composer autoload file the moment the autoloader runs. Keyed off it, the
+unit suite tried to boot WordPress.
+
+One test failed for a reason that was not the plugin's: it asserted that a fresh
+install has one administrator, and the WordPress test installer creates one of
+its own, so there were two and the guard had nothing to refuse. The test now
+builds the condition instead of assuming it. A premise, not a defect — but a
+green suite that never exercised the guard would have been worse than a red one.
+
+## 6c. What CI adds
+
+Four jobs on every push, on GitHub Actions:
+
+| Job | What it does |
+|---|---|
+| Coding standards | PHPCS against the WordPress standards, then PHPStan at level 8 |
+| Unit tests | The 225-test suite on PHP 8.1, 8.2, 8.3 and 8.4 — the plugin claims 8.1+, so it is checked on 8.1+ |
+| Integration and security | The 49 WordPress tests on PHP 8.1 and 8.3, against MySQL 8 |
+| Distributable package | Builds the package with `git archive`, then asserts that nothing from development is in it, that everything users need is, that no hidden file is, and that every shipped PHP file parses |
+
+The last job earned its place immediately: on its first run it failed, because
+the plugin declared "GPLv2 or later" in two places and shipped no copy of the
+licence. Saying which licence applies is not the same as granting it. `LICENSE`
+is now in the package.
+
+`scripts/wordpress-test-env.sh` builds the WordPress test environment — core,
+database config and all — and is the same script CI runs and a person runs, so a
+green pipeline means something reproducible rather than something only GitHub
+knows how to do.
 
 ## 7. Before submitting
 
@@ -144,8 +192,10 @@ if it came to that.
 
 | | |
 |---|---|
-| Files in the distributed package | 104 |
+| Files in the distributed package | 106 |
 | Unit tests | 225, no WordPress required |
+| WordPress tests | 49, in the `integration` and `security` suites |
+| PHP versions tested in CI | 8.1, 8.2, 8.3, 8.4 |
 | Checks inside a real WordPress | 109 |
 | Checks over HTTP | 70, across five flow scripts |
 | `php -l` | clean |

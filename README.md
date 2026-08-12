@@ -1,5 +1,7 @@
 # OxyArea
 
+[![CI](https://github.com/MorfeoIT/oxyarea/actions/workflows/ci.yml/badge.svg)](https://github.com/MorfeoIT/oxyarea/actions/workflows/ci.yml)
+
 **OxyArea – Private Client Area & User Portal** — a private-area and client-portal
 framework for WordPress. Part of the [OxyWP](https://oxywp.com/) family, by
 Oxysoft.
@@ -41,9 +43,9 @@ src/
   Roles/                 role manager, capability catalogue, audience provider
 tests/
   Unit/                  no WordPress, no database, runs anywhere
-  Support/               test doubles: in-memory rules, stub audience, fixed clock
-  Integration/           needs a WordPress test install
-  Security/              the Alice/Bob isolation suite
+  Support/               test doubles, and the cast every WordPress test uses
+  Integration/           the harness itself, and the role manager's refusals
+  Security/              content restriction and account privacy
 .wordpress-org/          directory assets: icons, banners, screenshots
 ```
 
@@ -72,9 +74,28 @@ PRO's permission inspector show the decision the site actually made.
 ```bash
 composer install
 composer check      # phpcs, then phpstan, then the unit suite
-composer test       # unit suite alone
+composer test       # unit suite alone: no WordPress, no database, anywhere
 composer lint:fix   # phpcbf
 ```
+
+The other two suites need a WordPress and a database of their own. Build both,
+then point PHPUnit at what the script wrote:
+
+```bash
+export WP_PHPUNIT__TESTS_CONFIG="$(scripts/wordpress-test-env.sh)"
+composer test:wordpress
+```
+
+`WP_DB_NAME`, `WP_DB_USER`, `WP_DB_PASSWORD` and `WP_DB_HOST` say where. Without
+`WP_PHPUNIT__TESTS_CONFIG` the bootstrap loads no WordPress at all, which is why
+`composer test` works on a machine that has no database.
+
+CI runs all of it on every push: standards and PHPStan, the unit suite on PHP
+8.1 through 8.4, the WordPress suites on 8.1 and 8.3 against MySQL 8, and a job
+that builds the distributable with `git archive` and inspects it. That last one
+is there because `.gitattributes` is easy to forget when a directory is added,
+and the plugin directory's reviewers are not. It caught a missing `LICENSE` on
+its first run.
 
 ## The rules this codebase is held to
 
@@ -103,6 +124,9 @@ gate is written in terms of them:
 | Bob | role Customer, company Beta |
 | Carol | role Agent |
 | Dave | signed out |
+
+`tests/Support/CastTestCase.php` builds them, so a test reads as the thing it
+checks rather than as ten lines of setup.
 
 Nothing ships if Alice can reach Bob's data by guessing a URL, changing an ID, or
 through REST, AJAX, search, a feed, the sitemap or a static file URL.
@@ -157,8 +181,9 @@ wp eval-file tests/manual/smoke.php
 `tests/manual/smoke.php` exercises what only exists inside WordPress — the role
 manager's refusals, the escalation guard, the assignment repository, the resolver
 wired to real roles, and the authentication forms — and cleans up after itself.
-It is not PHPUnit; it is what covers those classes until the integration suite
-exists.
+It is not PHPUnit. It predates the integration suite and overlaps it; what it
+still adds is that it runs inside the *deployed* plugin on the test bed, against
+the package as unpacked, rather than against the working copy.
 
 `scripts/testbed-login-flow.sh` is the only check that goes through HTTP: a real
 page, a real form, a real nonce, a real session cookie. Everything else proves
@@ -197,18 +222,15 @@ Sprint G complete: the release candidate. Settings, export and import, a setup
 wizard, and 274 translatable strings in `languages/oxyarea.pot`.
 
 Verified on WordPress 7.0.3: the plugin activates without a single PHP notice,
-**Plugin Check reports no errors and one warning**, 225 unit tests pass, the 109
-checks in `tests/manual/smoke.php` pass inside a real installation, and the 70
-checks in the five flow scripts pass over HTTP — including the release blockers
-asked as a stranger and then as each of two customers, and the forgotten-password
-flow from the email to signing in with the new password.
+**Plugin Check reports no errors and one warning**, 225 unit tests pass, 49
+WordPress tests pass in the `integration` and `security` suites, the 109 checks
+in `tests/manual/smoke.php` pass inside a real installation, and the 70 checks in
+the five flow scripts pass over HTTP — including the release blockers asked as a
+stranger and then as each of two customers, and the forgotten-password flow from
+the email to signing in with the new password.
 
 **Read [`docs/SUBMISSION_READINESS.md`](docs/SUBMISSION_READINESS.md) before
 submitting.** One thing is outstanding and it is not code: the Name Lock
 checklist has a manual trademark similarity step nobody has done.
 
 PRO begins only after that, as the master prompt requires.
-
-Still outstanding: the PHPUnit `integration` and `security` suites are empty. The
-manual scripts cover the same ground for now, but they are scripts with a pass
-counter, not test suites, and they do not run in CI.
