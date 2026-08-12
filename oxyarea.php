@@ -31,6 +31,26 @@ const MIN_PHP     = '8.1';
 const MIN_WP      = '6.5';
 
 /**
+ * Version of the extension contract, not of the plugin.
+ *
+ * An add-on needs to say "I require the OxyArea API" without pinning itself to a
+ * release, because the two move at different speeds: OxyArea will ship bug fixes
+ * and features weekly that change nothing an add-on can see, and must be free to
+ * do so without every add-on declaring a new minimum.
+ *
+ * What this number covers is everything an add-on is invited to rely on: the
+ * `oxyarea_*` actions and filters, the interfaces under `Access`, `Dashboard`,
+ * `Redirect` and `Infrastructure`, the service container's identifiers, and the
+ * shape of the values passed to and returned from all of them.
+ *
+ * Raise the major when something in that list is removed or changes meaning, so
+ * that an add-on built against the old contract refuses to load rather than
+ * failing halfway through a request. Raise the minor when something is added and
+ * everything already written keeps working.
+ */
+const API_VERSION = '1.0';
+
+/**
  * Absolute path to the plugin directory, with a trailing slash.
  *
  * @return string

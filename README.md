@@ -97,6 +97,32 @@ is there because `.gitattributes` is easy to forget when a directory is added,
 and the plugin directory's reviewers are not. It caught a missing `LICENSE` on
 its first run.
 
+## The extension API
+
+`OxyArea\API_VERSION` is the version of the contract add-ons are invited to
+rely on, and it moves independently of `OxyArea\VERSION`. An add-on requires an
+API version, never a release.
+
+```php
+if ( ! defined( 'OxyArea\API_VERSION' ) || version_compare( OxyArea\API_VERSION, '1.0', '<' ) ) {
+    return; // Do nothing at all, and say why in an admin notice.
+}
+```
+
+What the contract covers:
+
+| | |
+|---|---|
+| Services | `oxyarea_register_services` — add to the container before anything is built |
+| Audiences | `oxyarea_audience_providers` — teach the resolver what a user counts as |
+| Decisions | `oxyarea_access_decision` — observe or override a verdict, with its reasoning |
+| Interfaces | `Access\*Interface`, `Dashboard\*Interface`, `Redirect\RuleRepositoryInterface`, `Infrastructure\ClockInterface` |
+| Events | `oxyarea_init`, `oxyarea_role_*`, `oxyarea_user_role_assigned`, `oxyarea_password_reset*`, `oxyarea_content_refused`, `oxyarea_dashboard_rendered`, `oxyarea_*_destination`, `oxyarea_unauthorised_behaviour`, `oxyarea_brand_*` |
+
+The major rises when something there is removed or changes meaning, so an add-on
+built against the old contract refuses to load rather than failing halfway
+through a request. The minor rises when something is added.
+
 ## The rules this codebase is held to
 
 1. **One access resolver.** Every question about who may see what goes through
