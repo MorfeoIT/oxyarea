@@ -37,14 +37,23 @@ final class Menu implements Registrable {
 	private RedirectsScreen $redirects;
 
 	/**
+	 * The dashboard preview.
+	 *
+	 * @var DashboardPreviewScreen
+	 */
+	private DashboardPreviewScreen $preview;
+
+	/**
 	 * Build the menu.
 	 *
-	 * @param RolesScreen     $roles     The roles screen.
-	 * @param RedirectsScreen $redirects The redirects screen.
+	 * @param RolesScreen            $roles     The roles screen.
+	 * @param RedirectsScreen        $redirects The redirects screen.
+	 * @param DashboardPreviewScreen $preview   The dashboard preview.
 	 */
-	public function __construct( RolesScreen $roles, RedirectsScreen $redirects ) {
+	public function __construct( RolesScreen $roles, RedirectsScreen $redirects, DashboardPreviewScreen $preview ) {
 		$this->roles     = $roles;
 		$this->redirects = $redirects;
+		$this->preview   = $preview;
 	}
 
 	/**
@@ -82,6 +91,15 @@ final class Menu implements Registrable {
 			Capabilities::MANAGE_ROLES,
 			Brand::MENU_SLUG,
 			array( $this->roles, 'render' )
+		);
+
+		add_submenu_page(
+			Brand::MENU_SLUG,
+			__( 'Dashboard preview', 'oxyarea' ),
+			__( 'Preview', 'oxyarea' ),
+			Capabilities::MANAGE_DASHBOARDS,
+			DashboardPreviewScreen::SLUG,
+			array( $this->preview, 'render' )
 		);
 
 		add_submenu_page(

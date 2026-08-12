@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/profile-summary",
+    "title": "Account summary",
+    "category": "widgets",
+    "icon": "id",
+    "description": "The reader's name, email address and account type, read only.",
+    "keywords": ["profile", "account", "summary"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false,
+        "multiple": false
+    },
+    "attributes": {}
+}

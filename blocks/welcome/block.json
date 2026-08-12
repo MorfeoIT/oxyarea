@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/welcome",
+    "title": "Welcome line",
+    "category": "widgets",
+    "icon": "admin-users",
+    "description": "A line of text with the reader's own details filled in, such as {{display_name}}.",
+    "keywords": ["welcome", "greeting", "name"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false
+    },
+    "attributes": {
+        "text": {
+            "type": "string",
+            "default": ""
+        }
+    }
+}

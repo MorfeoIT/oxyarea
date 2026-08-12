@@ -8,9 +8,9 @@
  *
  * Every block renders on the server, so `save` returns null and there is nothing
  * to keep in sync between two implementations of the same form. What the editor
- * shows is a labelled placeholder rather than a live preview: these are forms,
- * and a form that half works inside the editor invites somebody to type their
- * password into it.
+ * shows is a labelled placeholder rather than a live preview: most of these are
+ * forms, and a form that half works inside the editor invites somebody to type
+ * their password into it.
  *
  * Titles and descriptions come from each block.json through the server
  * registration, so they are translated once, in PHP, and not repeated here.
@@ -47,7 +47,7 @@
 	}
 
 	/**
-	 * Register one server-rendered block.
+	 * Register one server-rendered block with a placeholder for an editor.
 	 *
 	 * @param {string} name The block name.
 	 * @param {string} note What the visitor will see.
@@ -85,4 +85,62 @@
 		'oxyarea/profile',
 		__( 'People can change their own name, email address and password here.', 'oxyarea' )
 	);
+
+	register(
+		'oxyarea/dashboard',
+		__( 'The dashboard belonging to whoever is reading. Which one that is depends on their role.', 'oxyarea' )
+	);
+
+	register(
+		'oxyarea/profile-summary',
+		__( 'The reader’s name, email address and account type. Read only.', 'oxyarea' )
+	);
+
+	/**
+	 * The welcome line is the one block with something to edit, so it gets a
+	 * field rather than a placeholder. A plain input: enough to type a sentence
+	 * with a placeholder in it, and nothing that pretends to be a live preview of
+	 * a value only the visitor's own account can supply.
+	 */
+	blocks.registerBlockType( 'oxyarea/welcome', {
+		edit: function ( props ) {
+			var value = props.attributes.text || '';
+
+			return el(
+				'div',
+				useBlockProps( { className: 'oxyarea-editor-placeholder' } ),
+				el(
+					'span',
+					{ className: 'oxyarea-editor-placeholder__badge' },
+					'OxyArea'
+				),
+				el(
+					'label',
+					{
+						className: 'oxyarea-editor-placeholder__name',
+						htmlFor: 'oxyarea-welcome-' + props.clientId
+					},
+					__( 'Welcome line', 'oxyarea' )
+				),
+				el( 'input', {
+					id: 'oxyarea-welcome-' + props.clientId,
+					type: 'text',
+					className: 'oxyarea-editor-placeholder__field',
+					value: value,
+					placeholder: __( 'Welcome, {{display_name}}.', 'oxyarea' ),
+					onChange: function ( event ) {
+						props.setAttributes( { text: event.target.value } );
+					}
+				} ),
+				el(
+					'p',
+					{ className: 'oxyarea-editor-placeholder__note' },
+					__( 'Placeholders: {{display_name}} {{first_name}} {{last_name}} {{username}} {{user_email}} {{user_id}}', 'oxyarea' )
+				)
+			);
+		},
+		save: function () {
+			return null;
+		}
+	} );
 } )( window.wp.blocks, window.wp.element, window.wp.blockEditor, window.wp.i18n );

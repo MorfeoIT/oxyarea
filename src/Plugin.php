@@ -14,6 +14,7 @@ use OxyArea\Access\AssignmentRepositoryInterface;
 use OxyArea\Access\AudienceProviderInterface;
 use OxyArea\Access\AudienceResolver;
 use OxyArea\Access\HookedAccessResolver;
+use OxyArea\Admin\DashboardPreviewScreen;
 use OxyArea\Admin\Menu;
 use OxyArea\Admin\RedirectsScreen;
 use OxyArea\Admin\RolesScreen;
@@ -26,7 +27,13 @@ use OxyArea\Auth\LostPasswordForm;
 use OxyArea\Auth\PasswordResetLinks;
 use OxyArea\Auth\ProfileForm;
 use OxyArea\Auth\ResetPasswordForm;
+use OxyArea\Blocks\DashboardBlocks;
 use OxyArea\Blocks\Registrar;
+use OxyArea\Dashboard\AudienceMetabox;
+use OxyArea\Dashboard\DashboardPostType;
+use OxyArea\Dashboard\DashboardRenderer;
+use OxyArea\Dashboard\DashboardRepositoryInterface;
+use OxyArea\Dashboard\DashboardResolver;
 use OxyArea\Infrastructure\ClockInterface;
 use OxyArea\Infrastructure\Container;
 use OxyArea\Infrastructure\Migrator;
@@ -35,6 +42,7 @@ use OxyArea\Infrastructure\Settings;
 use OxyArea\Infrastructure\SystemClock;
 use OxyArea\Infrastructure\Templates;
 use OxyArea\Persistence\AssignmentRepository;
+use OxyArea\Persistence\DashboardRepository;
 use OxyArea\Persistence\RedirectRuleRepository;
 use OxyArea\Privacy\PrivacyPolicy;
 use OxyArea\Redirect\RedirectResolver;
@@ -166,6 +174,41 @@ final class Plugin {
 	 * Service identifier of the redirects screen.
 	 */
 	public const REDIRECTS_SCREEN = 'admin.redirects';
+
+	/**
+	 * Service identifier of the dashboard post type.
+	 */
+	public const DASHBOARD_POST_TYPE = 'dashboard.post-type';
+
+	/**
+	 * Service identifier of the dashboard store.
+	 */
+	public const DASHBOARDS = 'dashboard.repository';
+
+	/**
+	 * Service identifier of the dashboard resolver.
+	 */
+	public const DASHBOARD_RESOLVER = 'dashboard.resolver';
+
+	/**
+	 * Service identifier of the dashboard renderer.
+	 */
+	public const DASHBOARD_RENDERER = 'dashboard.renderer';
+
+	/**
+	 * Service identifier of the audience metabox.
+	 */
+	public const DASHBOARD_AUDIENCE = 'dashboard.audience';
+
+	/**
+	 * Service identifier of the dashboard blocks.
+	 */
+	public const DASHBOARD_BLOCKS = 'dashboard.blocks';
+
+	/**
+	 * Service identifier of the dashboard preview screen.
+	 */
+	public const DASHBOARD_PREVIEW = 'admin.dashboard-preview';
 
 	/**
 	 * Service identifier of the roles screen.
@@ -374,6 +417,45 @@ final class Plugin {
 		);
 
 		$container->set(
+			self::DASHBOARD_POST_TYPE,
+			static fn (): DashboardPostType => new DashboardPostType()
+		);
+
+		$container->set(
+			self::DASHBOARDS,
+			static fn (): DashboardRepository => new DashboardRepository()
+		);
+
+		$container->set(
+			self::DASHBOARD_RESOLVER,
+			static fn (): DashboardResolver => new DashboardResolver()
+		);
+
+		$container->set(
+			self::DASHBOARD_RENDERER,
+			static fn ( Container $c ): DashboardRenderer => new DashboardRenderer(
+				$c->get_typed( self::DASHBOARDS, DashboardRepositoryInterface::class ),
+				$c->get_typed( self::DASHBOARD_RESOLVER, DashboardResolver::class ),
+				$c->get_typed( self::AUDIENCE, AudienceResolver::class )
+			)
+		);
+
+		$container->set(
+			self::DASHBOARD_AUDIENCE,
+			static fn ( Container $c ): AudienceMetabox => new AudienceMetabox(
+				$c->get_typed( self::DASHBOARDS, DashboardRepository::class )
+			)
+		);
+
+		$container->set(
+			self::DASHBOARD_BLOCKS,
+			static fn ( Container $c ): DashboardBlocks => new DashboardBlocks(
+				$c->get_typed( self::DASHBOARD_RENDERER, DashboardRenderer::class ),
+				$c->get_typed( self::TEMPLATES, Templates::class )
+			)
+		);
+
+		$container->set(
 			self::REDIRECT_RULES,
 			static fn (): RedirectRuleRepository => new RedirectRuleRepository()
 		);
@@ -414,10 +496,18 @@ final class Plugin {
 			);
 
 			$container->set(
+				self::DASHBOARD_PREVIEW,
+				static fn ( Container $c ): DashboardPreviewScreen => new DashboardPreviewScreen(
+					$c->get_typed( self::DASHBOARD_RENDERER, DashboardRenderer::class )
+				)
+			);
+
+			$container->set(
 				self::MENU,
 				static fn ( Container $c ): Menu => new Menu(
 					$c->get_typed( self::ROLES_SCREEN, RolesScreen::class ),
-					$c->get_typed( self::REDIRECTS_SCREEN, RedirectsScreen::class )
+					$c->get_typed( self::REDIRECTS_SCREEN, RedirectsScreen::class ),
+					$c->get_typed( self::DASHBOARD_PREVIEW, DashboardPreviewScreen::class )
 				)
 			);
 		}

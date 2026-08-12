@@ -473,6 +473,137 @@ check( 'the rules are gone', array() === $rules->all() );
 
 get_user_by( 'id', $carol->ID )->remove_role( 'subscriber' );
 
+echo "\n== the dashboard post type and blocks exist ==\n";
+
+check(
+	'the post type is registered',
+	post_type_exists( \OxyArea\Dashboard\DashboardPostType::POST_TYPE )
+);
+check(
+	'and is not publicly queryable',
+	! (bool) get_post_type_object( \OxyArea\Dashboard\DashboardPostType::POST_TYPE )->publicly_queryable
+);
+
+foreach ( array( 'dashboard', 'welcome', 'profile-summary' ) as $dashboard_block ) {
+	check(
+		"the oxyarea/{$dashboard_block} block is registered",
+		\WP_Block_Type_Registry::get_instance()->is_registered( 'oxyarea/' . $dashboard_block )
+	);
+}
+
+echo "\n== one template, many people ==\n";
+
+/**
+ * A renderer with a fresh cache, since dashboards and roles change during this run.
+ *
+ * @return \OxyArea\Dashboard\DashboardRenderer
+ */
+function dashboards(): \OxyArea\Dashboard\DashboardRenderer {
+	$repository = new \OxyArea\Persistence\DashboardRepository();
+	$repository->flush();
+
+	return new \OxyArea\Dashboard\DashboardRenderer(
+		$repository,
+		new \OxyArea\Dashboard\DashboardResolver(),
+		new \OxyArea\Access\AudienceResolver( array( new \OxyArea\Roles\RoleAudienceProvider() ) )
+	);
+}
+
+/**
+ * Make a dashboard.
+ *
+ * @param string $title    Its title.
+ * @param string $audience The audience meta value.
+ * @param string $content  Its content.
+ * @return int
+ */
+function make_dashboard( string $title, string $audience, string $content ): int {
+	$id = wp_insert_post(
+		array(
+			'post_type'    => \OxyArea\Dashboard\DashboardPostType::POST_TYPE,
+			'post_status'  => 'publish',
+			'post_title'   => $title,
+			'post_content' => $content,
+		)
+	);
+
+	if ( '' !== $audience ) {
+		update_post_meta( (int) $id, \OxyArea\Dashboard\DashboardPostType::AUDIENCE_META, $audience );
+	}
+
+	return (int) $id;
+}
+
+$default_dashboard = make_dashboard( 'Everybody', '', '<p>The general area.</p>' );
+$agent_dashboard   = make_dashboard( 'Agents', 'role:' . $agent, '<p>Hello {{display_name}}, this is the agent area.</p>' );
+
+$resolved_alice = dashboards()->resolve_for( $alice->ID );
+$resolved_carol = dashboards()->resolve_for( $carol->ID );
+
+check( 'Alice, with no dashboard of her own, gets the default', null !== $resolved_alice && $default_dashboard === $resolved_alice->id() );
+check( 'Carol, an agent, gets the agent one', null !== $resolved_carol && $agent_dashboard === $resolved_carol->id() );
+check( 'a signed-out visitor gets nothing at all', null === dashboards()->resolve_for( 0 ) );
+
+echo "\n== the placeholders are filled in, and escaped ==\n";
+
+$carol_html = dashboards()->render_for( $carol->ID );
+
+check( 'the agent content is there', false !== strpos( $carol_html, 'this is the agent area' ) );
+check( 'and the name has been filled in', false !== strpos( $carol_html, (string) $carol->display_name ) );
+check( 'with no placeholder left behind', false === strpos( $carol_html, '{{' ) );
+
+// A display name with markup in it is ordinary carelessness or a deliberate
+// attempt; both come out as text.
+$awkward = 'Carol <script>alert(1)</script>';
+wp_update_user( array( 'ID' => $carol->ID, 'display_name' => $awkward ) );
+
+$escaped_html = dashboards()->render_for( $carol->ID );
+
+check( 'a script tag in a display name does not reach the page', false === strpos( $escaped_html, '<script>' ) );
+check( 'it arrives as text instead', false !== strpos( $escaped_html, '&lt;script&gt;' ) );
+
+wp_update_user( array( 'ID' => $carol->ID, 'display_name' => 'Carol (agent)' ) );
+
+echo "\n== an unreadable audience narrows, it does not widen ==\n";
+
+// A dashboard whose audience nobody can read must disappear, not become the
+// site default and land on everybody signed in.
+update_post_meta( $agent_dashboard, \OxyArea\Dashboard\DashboardPostType::AUDIENCE_META, 'something-from-the-future' );
+
+$after = dashboards()->resolve_for( $carol->ID );
+
+check(
+	'the unreadable one is dropped rather than served to everybody',
+	null !== $after && $default_dashboard === $after->id()
+);
+
+update_post_meta( $agent_dashboard, \OxyArea\Dashboard\DashboardPostType::AUDIENCE_META, 'role:' . $agent );
+
+echo "\n== a draft is not a dashboard ==\n";
+
+wp_update_post( array( 'ID' => $agent_dashboard, 'post_status' => 'draft' ) );
+
+$drafted = dashboards()->resolve_for( $carol->ID );
+
+check( 'an unpublished dashboard does not resolve', null !== $drafted && $default_dashboard === $drafted->id() );
+
+wp_update_post( array( 'ID' => $agent_dashboard, 'post_status' => 'publish' ) );
+
+echo "\n== the preview asks about a role, not a person ==\n";
+
+$previewed = dashboards()->resolve_for_role( $agent );
+
+check( 'previewing the agent role finds the agent dashboard', null !== $previewed && $agent_dashboard === $previewed->id() );
+check( 'previewing a role with nothing of its own finds the default', null !== dashboards()->resolve_for_role( 'subscriber' ) );
+
+wp_delete_post( $default_dashboard, true );
+wp_delete_post( $agent_dashboard, true );
+
+$leftover = new \OxyArea\Persistence\DashboardRepository();
+$leftover->flush();
+
+check( 'the test dashboards are gone', array() === $leftover->all() );
+
 echo "\n== cleaning up ==\n";
 
 wp_delete_post( (int) $post_id, true );

@@ -1,0 +1,18 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "oxyarea/dashboard",
+    "title": "Private dashboard",
+    "category": "widgets",
+    "icon": "layout",
+    "description": "Shows the dashboard belonging to whoever is reading. One template serves everybody who holds a role.",
+    "keywords": ["dashboard", "private", "portal", "area"],
+    "textdomain": "oxyarea",
+    "editorScript": "oxyarea-blocks",
+    "style": "oxyarea-forms",
+    "supports": {
+        "html": false,
+        "multiple": false
+    },
+    "attributes": {}
+}
