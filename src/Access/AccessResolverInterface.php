@@ -30,22 +30,22 @@ interface AccessResolverInterface {
 	 * unknown resource, an unknown user, or any state the resolver cannot make
 	 * sense of, is false.
 	 *
-	 * @param int               $user_id  User ID, or 0 for a signed-out visitor.
-	 * @param ResourceInterface $resource The resource in question.
+	 * @param int               $user_id User ID, or 0 for a signed-out visitor.
+	 * @param ResourceInterface $target  The resource in question.
 	 * @return bool
 	 */
-	public function can_view( int $user_id, ResourceInterface $resource ): bool;
+	public function can_view( int $user_id, ResourceInterface $target ): bool;
 
 	/**
 	 * The same question, answered with its reasoning.
 	 *
-	 * can_view() is this, reduced to its boolean. Keeping them on one interface
-	 * is what guarantees that the explanation an administrator reads is the
-	 * decision the site actually made.
+	 * Reducing this to its boolean is what can_view() does. Keeping the two on
+	 * one interface is what guarantees that the explanation an administrator
+	 * reads is the decision the site actually made.
 	 *
-	 * @param int               $user_id  User ID, or 0 for a signed-out visitor.
-	 * @param ResourceInterface $resource The resource in question.
+	 * @param int               $user_id User ID, or 0 for a signed-out visitor.
+	 * @param ResourceInterface $target  The resource in question.
 	 * @return Decision
 	 */
-	public function explain( int $user_id, ResourceInterface $resource ): Decision;
+	public function explain( int $user_id, ResourceInterface $target ): Decision;
 }

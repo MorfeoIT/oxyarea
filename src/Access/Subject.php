@@ -71,6 +71,8 @@ final class Subject {
 	private string $id;
 
 	/**
+	 * Build a subject.
+	 *
 	 * @param string     $type Subject type.
 	 * @param string|int $id   Identifier within the type.
 	 *

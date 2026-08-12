@@ -77,15 +77,15 @@ global $wpdb;
 if ( is_multisite() ) {
 	// Each site keeps its own tables, its own settings and its own answer to the
 	// question of whether the data should go.
-	$sites = get_sites(
+	$oxyarea_sites = get_sites(
 		array(
 			'fields' => 'ids',
 			'number' => 0,
 		)
 	);
 
-	foreach ( (array) $sites as $site_id ) {
-		switch_to_blog( (int) $site_id );
+	foreach ( (array) $oxyarea_sites as $oxyarea_site_id ) {
+		switch_to_blog( (int) $oxyarea_site_id );
 		oxyarea_uninstall_site( $wpdb );
 		restore_current_blog();
 	}

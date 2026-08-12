@@ -49,7 +49,7 @@ final class Container {
 	 * of a request holding two different objects is a bug that surfaces far from
 	 * its cause.
 	 *
-	 * @param string                     $id      Service identifier.
+	 * @param string                      $id      Service identifier.
 	 * @param callable(Container): object $factory Builds the service.
 	 * @return void
 	 *

@@ -92,8 +92,13 @@ final class Migrator {
 	 * @return array<int, callable(): void>
 	 */
 	private function migrations(): array {
+		// Closures, not [$this, 'method'] pairs: the callable-array form resolves
+		// its scope at call time, which makes a private target work here and fail
+		// the moment anything else invokes the same array.
 		return array(
-			1 => fn (): void => $this->create_assignments_table(),
+			1 => function (): void {
+				$this->create_assignments_table();
+			},
 		);
 	}
 

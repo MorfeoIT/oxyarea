@@ -40,7 +40,12 @@ final class Decision {
 	private array $steps;
 
 	/**
-	 * @param bool                                     $allowed Whether access is granted.
+	 * Build a decision.
+	 *
+	 * Private: decisions are made through allow() and deny(), never assembled
+	 * from the outside.
+	 *
+	 * @param bool                                      $allowed Whether access is granted.
 	 * @param list<array{passed: bool, reason: string}> $steps   The reasoning.
 	 */
 	private function __construct( bool $allowed, array $steps ) {

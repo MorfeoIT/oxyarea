@@ -58,6 +58,8 @@ final class ProtectedResource implements ResourceInterface {
 	private int $id;
 
 	/**
+	 * Build a resource reference.
+	 *
 	 * @param string $type Resource type.
 	 * @param int    $id   Resource identifier.
 	 *
