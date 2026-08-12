@@ -119,18 +119,33 @@ abstract class Form implements FormHandler {
 	}
 
 	/**
-	 * The URL of the page the form is on, without our own notice flag.
+	 * The path of the page the form is on, without our own notice flag.
 	 *
-	 * The flag has to go or a message stays on screen through the next
-	 * submission, describing something that happened two clicks ago.
+	 * Read from the request rather than from WP::$request, which is what this
+	 * used to do and which is empty here: forms are handled on `init`, and
+	 * WordPress does not work out which page was asked for until `parse_request`,
+	 * several hooks later. The symptom was quiet — a redirect to the site's front
+	 * page instead of back to the form — and it survived every test until one
+	 * followed the redirect.
+	 *
+	 * A path and not an absolute URL. It goes through the same guard as anything
+	 * else, so what comes back is a path on this site or nothing at all, and
+	 * wp_safe_redirect() and add_query_arg() both take a path happily.
 	 *
 	 * @return string
 	 */
 	protected function current_url(): string {
-		global $wp;
+		// The URL of the page being displayed. Nothing is acted on: it is where
+		// the browser already is, and it is made safe on the next line.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$requested = isset( $_SERVER['REQUEST_URI'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+			: '';
 
-		$url = home_url( add_query_arg( array(), $wp->request ?? '' ) );
+		$safe = Destination::make_safe( $requested, '/' );
 
-		return remove_query_arg( Notices::PARAMETER, $url );
+		// The flag has to go, or a message stays on screen through the next
+		// submission, describing something that happened two clicks ago.
+		return remove_query_arg( Notices::PARAMETER, $safe );
 	}
 }
