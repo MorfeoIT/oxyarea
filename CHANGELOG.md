@@ -6,6 +6,22 @@ All notable changes to OxyArea are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Add-ons can take part in a blueprint** (extension API 1.5). An export gains
+  an `extras` section, keyed by whoever contributed it and carried through
+  untouched; `oxyarea_blueprint_import_extras` fires before this plugin's own
+  rules and dashboards, so a company a rule names exists by the time the rule is
+  read. A site that exports with an add-on installed and imports without it keeps
+  the section unread and applies it the day the add-on arrives — dropping it
+  would make an export quietly lossy in a way nobody notices until they need it.
+  Files are never in a blueprint, from any contributor.
+- **`oxyarea_blueprint_import_report`** (extension API 1.6), so an add-on's half
+  of an import is accounted for on the one notice the site owner reads. `notes`
+  and `skipped` are two lists on purpose: the notice takes its colour from
+  `skipped`, so what did arrive must not be able to turn it red, and what did not
+  must not be able to hide in the same sentence.
+
 ### Fixed
 
 - **The sign-in button had no words on it.** Every `block.json` declares its text

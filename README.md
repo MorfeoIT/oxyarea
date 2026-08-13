@@ -122,6 +122,8 @@ What the contract covers:
 | Widgets | `oxyarea_dashboard_widgets` — contribute a `DashboardWidgetInterface`, placed with `[oxyarea_widget name="…"]` |
 | Interfaces | `Access\*Interface`, `Dashboard\*Interface`, `Redirect\RuleRepositoryInterface`, `Infrastructure\ClockInterface` |
 | Windows | `Assignment::starts_at()` / `ends_at()` — a rule that begins or stops on a date, stored and enforced |
+| Blueprints | `oxyarea_blueprint_extras` to put a section of your own into an export, `oxyarea_blueprint_import_extras` to apply it — fired before this plugin's rules, so a company a rule names exists by the time the rule is read |
+| Import reports | `oxyarea_blueprint_import_report` — say what you applied (`notes`) and what you could not (`skipped`), on the one notice the site owner reads |
 | Events | `oxyarea_init`, `oxyarea_role_*`, `oxyarea_user_role_assigned`, `oxyarea_password_reset*`, `oxyarea_content_refused`, `oxyarea_dashboard_rendered`, `oxyarea_*_destination`, `oxyarea_unauthorised_behaviour`, `oxyarea_brand_*` |
 
 The major rises when something there is removed or changes meaning, so an add-on
@@ -140,6 +142,13 @@ order in a shop — belongs to an add-on. And a condition this site cannot judge
 makes its rule **not apply**, rather than apply to everybody: deactivating the
 add-on that provided "only on their first sign-in" must not start sending every
 customer where one of them was meant to go.
+
+A blueprint carries an add-on's section **untouched**, and keeps it even when
+that add-on is not installed. A site that exports with PRO and imports without it
+applies the section the day PRO arrives; dropping it would make an export quietly
+lossy in a way nobody notices until they need it. Files are never in a blueprint,
+from any contributor: an export gets emailed, attached to a ticket and left in a
+downloads folder.
 
 `Access\SubjectCodec` is the one parser for the strings a form field carries —
 `authenticated`, `role:editor`, and whatever an add-on adds. The property to
