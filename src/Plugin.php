@@ -44,6 +44,7 @@ use OxyArea\Dashboard\DashboardPostType;
 use OxyArea\Dashboard\DashboardRenderer;
 use OxyArea\Dashboard\DashboardRepositoryInterface;
 use OxyArea\Dashboard\DashboardResolver;
+use OxyArea\Dashboard\Widgets as DashboardWidgets;
 use OxyArea\Infrastructure\ClockInterface;
 use OxyArea\Infrastructure\Container;
 use OxyArea\Infrastructure\Migrator;
@@ -244,6 +245,14 @@ final class Plugin {
 	public const DASHBOARD_RENDERER = 'dashboard.renderer';
 
 	/**
+	 * The widgets a dashboard can contain.
+	 *
+	 * Empty in the free plugin: the plain parts of a dashboard are blocks, and a
+	 * widget is for the things that have to know who is looking.
+	 */
+	public const DASHBOARD_WIDGETS = 'dashboard.widgets';
+
+	/**
 	 * Service identifier of the audience metabox.
 	 */
 	public const DASHBOARD_AUDIENCE = 'dashboard.audience';
@@ -365,6 +374,11 @@ final class Plugin {
 		$container->set(
 			self::ASSIGNMENTS,
 			static fn (): AssignmentRepository => new AssignmentRepository()
+		);
+
+		$container->set(
+			self::DASHBOARD_WIDGETS,
+			static fn (): DashboardWidgets => new DashboardWidgets()
 		);
 
 		$container->set(
@@ -539,7 +553,8 @@ final class Plugin {
 			static fn ( Container $c ): DashboardRenderer => new DashboardRenderer(
 				$c->get_typed( self::DASHBOARDS, DashboardRepositoryInterface::class ),
 				$c->get_typed( self::DASHBOARD_RESOLVER, DashboardResolver::class ),
-				$c->get_typed( self::AUDIENCE, AudienceResolver::class )
+				$c->get_typed( self::AUDIENCE, AudienceResolver::class ),
+				$c->get_typed( self::DASHBOARD_WIDGETS, DashboardWidgets::class )
 			)
 		);
 

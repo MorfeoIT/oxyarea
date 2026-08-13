@@ -57,16 +57,29 @@ final class DashboardRenderer {
 	 * @param DashboardRepositoryInterface $dashboards Where the dashboards are.
 	 * @param DashboardResolver            $resolver   Which one wins.
 	 * @param AudienceResolver             $audience   What people count as.
+	 * @param Widgets|null                 $widgets    The widgets add-ons have offered.
 	 */
 	public function __construct(
 		DashboardRepositoryInterface $dashboards,
 		DashboardResolver $resolver,
-		AudienceResolver $audience
+		AudienceResolver $audience,
+		?Widgets $widgets = null
 	) {
 		$this->dashboards = $dashboards;
 		$this->resolver   = $resolver;
 		$this->audience   = $audience;
+		$this->widgets    = $widgets;
 	}
+
+	/**
+	 * The widgets an add-on has offered, or null when nothing collects them.
+	 *
+	 * Optional so that everything written before widgets could be contributed
+	 * still constructs.
+	 *
+	 * @var Widgets|null
+	 */
+	private ?Widgets $widgets;
 
 	/**
 	 * The dashboard a user gets, rendered.
@@ -139,6 +152,14 @@ final class DashboardRenderer {
 
 		$this->rendering = true;
 
+		// Widgets are told whose dashboard this is, for the length of this
+		// render and no longer. The preview screen draws somebody else's, and a
+		// widget left to ask `get_current_user_id()` there would show the
+		// administrator their own documents in the place a customer's go.
+		if ( null !== $this->widgets ) {
+			$this->widgets->drawing_for( $user_id );
+		}
+
 		try {
 			$content = (string) $post->post_content;
 
@@ -150,6 +171,10 @@ final class DashboardRenderer {
 			$html = do_shortcode( $html );
 		} finally {
 			$this->rendering = false;
+
+			if ( null !== $this->widgets ) {
+				$this->widgets->drawing_for( 0 );
+			}
 		}
 
 		$html = Tokens::replace( $html, self::values_for( $user_id ) );
