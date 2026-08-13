@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-12T14:57:06+02:00\n"
+"POT-Creation-Date: 2026-08-13T20:56:21+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: oxyarea\n"
@@ -41,9 +41,32 @@ msgid "https://oxysoft.it/"
 msgstr ""
 
 #. translators: 1: required PHP version, 2: required WordPress version.
-#: oxyarea.php:106
+#: oxyarea.php:126
 #, php-format
 msgid "OxyArea needs PHP %1$s or later and WordPress %2$s or later. It has not been started."
+msgstr ""
+
+#: src/Access/SubjectCodec.php:131
+msgid "Signed-out visitors"
+msgstr ""
+
+#: src/Access/SubjectCodec.php:134
+#: src/Admin/RedirectsScreen.php:347
+#: src/Admin/RestrictionMetabox.php:123
+#: src/Dashboard/AudienceMetabox.php:107
+msgid "Anybody signed in"
+msgstr ""
+
+#. translators: %s: role slug that no longer exists.
+#: src/Access/SubjectCodec.php:142
+#, php-format
+msgid "Role that no longer exists (%s)"
+msgstr ""
+
+#. translators: 1: subject type, 2: subject identifier.
+#: src/Access/SubjectCodec.php:166
+#, php-format
+msgid "%1$s %2$s"
 msgstr ""
 
 #: src/Admin/DashboardPreviewScreen.php:71
@@ -96,7 +119,7 @@ msgstr ""
 
 #: src/Admin/Menu.php:141
 #: src/Admin/Menu.php:142
-#: src/Admin/RedirectsScreen.php:89
+#: src/Admin/RedirectsScreen.php:99
 msgid "Redirects"
 msgstr ""
 
@@ -121,180 +144,171 @@ msgstr ""
 msgid "Setup"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:85
-#: src/Admin/RedirectsScreen.php:445
+#: src/Admin/RedirectsScreen.php:95
+#: src/Admin/RedirectsScreen.php:441
 msgid "You are not allowed to edit redirects."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:90
+#: src/Admin/RedirectsScreen.php:100
 msgid "Where people go after signing in, signing out, registering, or setting a new password. A rule about a role always beats a rule about everybody; where two rules are equally specific, the lower priority number wins."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:127
+#: src/Admin/RedirectsScreen.php:137
 msgid "A destination has to be a page on this site: either a path beginning with a slash, or a full address on this domain."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:143
+#: src/Admin/RedirectsScreen.php:153
 msgid "Rule added."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:161
+#: src/Admin/RedirectsScreen.php:171
 msgid "Rule removed."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:181
+#: src/Admin/RedirectsScreen.php:191
 #: src/Admin/RolesScreen.php:153
 #: src/Admin/SettingsScreen.php:171
 msgid "Saved."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:193
+#: src/Admin/RedirectsScreen.php:203
 #: src/Admin/SettingsScreen.php:97
 msgid "Where people land after signing in"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:194
+#: src/Admin/RedirectsScreen.php:204
 msgid "Worked out with the same engine that will decide it for real. A role with two rules shows the one that wins."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:197
+#: src/Admin/RedirectsScreen.php:207
 #: src/Admin/RolesScreen.php:260
 msgid "Role"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:198
+#: src/Admin/RedirectsScreen.php:208
 msgid "Lands on"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:199
+#: src/Admin/RedirectsScreen.php:209
 msgid "Decided by"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:219
+#: src/Admin/RedirectsScreen.php:229
 msgid "no rule — the front page"
 msgstr ""
 
 #. translators: %d: how many other rules also matched.
-#: src/Admin/RedirectsScreen.php:227
+#: src/Admin/RedirectsScreen.php:237
 #, php-format
 msgid "(%d other rule also matched)"
 msgid_plural "(%d other rules also matched)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Admin/RedirectsScreen.php:252
+#: src/Admin/RedirectsScreen.php:262
 msgid "No rules yet. WordPress decides."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:258
-#: src/Admin/RedirectsScreen.php:334
+#: src/Admin/RedirectsScreen.php:268
+#: src/Admin/RedirectsScreen.php:344
 msgid "Who"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:259
-#: src/Admin/RedirectsScreen.php:348
+#: src/Admin/RedirectsScreen.php:269
+#: src/Admin/RedirectsScreen.php:364
 msgid "Goes to"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:260
-#: src/Admin/RedirectsScreen.php:353
+#: src/Admin/RedirectsScreen.php:270
+#: src/Admin/RedirectsScreen.php:369
 msgid "Priority"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:261
+#: src/Admin/RedirectsScreen.php:271
 msgid "On"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:262
-#: src/Admin/RedirectsScreen.php:282
+#: src/Admin/RedirectsScreen.php:272
+#: src/Admin/RedirectsScreen.php:292
 msgid "Remove"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:275
+#: src/Admin/RedirectsScreen.php:285
 msgid "Turn off"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:275
+#: src/Admin/RedirectsScreen.php:285
 msgid "Turn on"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:321
+#: src/Admin/RedirectsScreen.php:331
 msgid "Add a rule"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:327
+#: src/Admin/RedirectsScreen.php:337
 msgid "After"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:336
+#: src/Admin/RedirectsScreen.php:346
 msgid "Everybody (the fallback)"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:337
-#: src/Admin/RedirectsScreen.php:404
-#: src/Admin/RestrictionMetabox.php:113
-#: src/Dashboard/AudienceMetabox.php:97
-msgid "Anybody signed in"
-msgstr ""
-
-#: src/Admin/RedirectsScreen.php:338
-#: src/Admin/RedirectsScreen.php:406
+#: src/Admin/RedirectsScreen.php:348
 msgid "Anybody not signed in"
 msgstr ""
 
 #. translators: %s: role name.
-#: src/Admin/RedirectsScreen.php:342
-#: src/Admin/RedirectsScreen.php:411
-#: src/Dashboard/AudienceMetabox.php:103
+#: src/Admin/RedirectsScreen.php:352
+#: src/Dashboard/AudienceMetabox.php:113
 #, php-format
 msgid "Role: %s"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:350
+#: src/Admin/RedirectsScreen.php:366
 msgid "A path on this site, beginning with a slash. Addresses on other domains are refused."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:355
+#: src/Admin/RedirectsScreen.php:371
 msgid "Only consulted between rules that are equally specific. Lower goes first, as with a WordPress hook."
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:359
+#: src/Admin/RedirectsScreen.php:375
 msgid "Add rule"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:399
+#: src/Admin/RedirectsScreen.php:407
 msgid "Everybody"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:426
+#: src/Admin/RedirectsScreen.php:422
 msgid "After signing in"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:428
+#: src/Admin/RedirectsScreen.php:424
 msgid "After signing out"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:430
+#: src/Admin/RedirectsScreen.php:426
 msgid "After registering"
 msgstr ""
 
-#: src/Admin/RedirectsScreen.php:432
+#: src/Admin/RedirectsScreen.php:428
 msgid "After setting a new password"
 msgstr ""
 
-#: src/Admin/RestrictionMetabox.php:83
+#: src/Admin/RestrictionMetabox.php:93
 msgid "Who can see this"
 msgstr ""
 
-#: src/Admin/RestrictionMetabox.php:104
+#: src/Admin/RestrictionMetabox.php:114
 msgid "Everybody — this page is public"
 msgstr ""
 
-#: src/Admin/RestrictionMetabox.php:107
+#: src/Admin/RestrictionMetabox.php:117
 msgid "Only these people:"
 msgstr ""
 
-#: src/Admin/RestrictionMetabox.php:126
+#: src/Admin/RestrictionMetabox.php:138
 msgid "A restricted page is kept out of search, feeds, the REST API and the sitemap as well as being refused when it is opened directly."
 msgstr ""
 
@@ -564,20 +578,24 @@ msgstr ""
 msgid "Imported: %1$d settings, %2$d redirect rules, %3$d dashboards (as drafts)."
 msgstr ""
 
-#: src/Admin/ToolsScreen.php:164
+#: src/Admin/ToolsScreen.php:163
+msgid "Also imported:"
+msgstr ""
+
+#: src/Admin/ToolsScreen.php:170
 msgid "Skipped:"
 msgstr ""
 
-#: src/Admin/ToolsScreen.php:187
-#: src/Admin/ToolsScreen.php:197
+#: src/Admin/ToolsScreen.php:193
+#: src/Admin/ToolsScreen.php:203
 msgid "That file did not arrive. Try again."
 msgstr ""
 
-#: src/Admin/ToolsScreen.php:203
+#: src/Admin/ToolsScreen.php:209
 msgid "That file is far larger than a configuration should be, so it has not been read."
 msgstr ""
 
-#: src/Admin/ToolsScreen.php:220
+#: src/Admin/ToolsScreen.php:226
 msgid "You are not allowed to use these tools."
 msgstr ""
 
@@ -766,7 +784,7 @@ msgid "This link cannot be used any more. Ask for a new one and use the most rec
 msgstr ""
 
 #: src/Blocks/DashboardBlocks.php:174
-#: assets/js/blocks.js:130
+#: assets/js/blocks.js:134
 msgid "Welcome, {{display_name}}."
 msgstr ""
 
@@ -782,20 +800,20 @@ msgstr ""
 msgid "Invalid post ID."
 msgstr ""
 
-#: src/Dashboard/AudienceMetabox.php:68
-#: src/Dashboard/AudienceMetabox.php:88
+#: src/Dashboard/AudienceMetabox.php:78
+#: src/Dashboard/AudienceMetabox.php:98
 msgid "Who this dashboard is for"
 msgstr ""
 
-#: src/Dashboard/AudienceMetabox.php:94
+#: src/Dashboard/AudienceMetabox.php:104
 msgid "The site default"
 msgstr ""
 
-#: src/Dashboard/AudienceMetabox.php:110
+#: src/Dashboard/AudienceMetabox.php:126
 msgid "One template serves everybody who holds the role. The site default is what somebody sees when their role has nothing of its own."
 msgstr ""
 
-#: src/Dashboard/AudienceMetabox.php:114
+#: src/Dashboard/AudienceMetabox.php:130
 msgid "Placeholders you can use in the content:"
 msgstr ""
 
@@ -914,19 +932,19 @@ msgid "That name leaves nothing usable as a role identifier. Use letters or numb
 msgstr ""
 
 #. translators: %s: the event named in the file.
-#: src/Tools/Porter.php:211
+#: src/Tools/Porter.php:316
 #, php-format
 msgid "A rule for an unknown moment, \"%s\"."
 msgstr ""
 
 #. translators: %s: the destination named in the file.
-#: src/Tools/Porter.php:221
+#: src/Tools/Porter.php:326
 #, php-format
 msgid "A rule pointing somewhere off this site, \"%s\"."
 msgstr ""
 
 #. translators: %s: the role named in the file.
-#: src/Tools/Porter.php:235
+#: src/Tools/Porter.php:340
 #, php-format
 msgid "A rule for a role this site does not have, \"%s\"."
 msgstr ""
@@ -1024,39 +1042,39 @@ msgstr ""
 msgid "Account type"
 msgstr ""
 
-#: assets/js/blocks.js:66
+#: assets/js/blocks.js:70
 msgid "A sign-in form appears here. People who are already signed in see who they are signed in as."
 msgstr ""
 
-#: assets/js/blocks.js:71
+#: assets/js/blocks.js:75
 msgid "A sign-out button appears here, and nothing at all for visitors who are not signed in."
 msgstr ""
 
-#: assets/js/blocks.js:76
+#: assets/js/blocks.js:80
 msgid "A form for asking to set a new password. It gives the same answer whether or not the account exists."
 msgstr ""
 
-#: assets/js/blocks.js:81
+#: assets/js/blocks.js:85
 msgid "The form people reach from the reset email. Put it on the same page as the sign-in form."
 msgstr ""
 
-#: assets/js/blocks.js:86
+#: assets/js/blocks.js:90
 msgid "People can change their own name, email address and password here."
 msgstr ""
 
-#: assets/js/blocks.js:91
+#: assets/js/blocks.js:95
 msgid "The dashboard belonging to whoever is reading. Which one that is depends on their role."
 msgstr ""
 
-#: assets/js/blocks.js:96
+#: assets/js/blocks.js:100
 msgid "The reader’s name, email address and account type. Read only."
 msgstr ""
 
-#: assets/js/blocks.js:123
+#: assets/js/blocks.js:127
 msgid "Welcome line"
 msgstr ""
 
-#: assets/js/blocks.js:138
+#: assets/js/blocks.js:142
 msgid "Placeholders: {{display_name}} {{first_name}} {{last_name}} {{username}} {{user_email}} {{user_id}}"
 msgstr ""
 
