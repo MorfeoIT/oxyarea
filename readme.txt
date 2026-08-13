@@ -94,5 +94,18 @@ the plugin off removes nothing at all.
 == Changelog ==
 
 = 0.1.0 =
-* Not yet released. Plugin foundation: bootstrap, service container, schema
-  migrations, capabilities, settings and the access contracts.
+* First public release.
+* Sign-in, sign-out, forgotten password, set a new password and profile, as blocks and as shortcodes.
+* A role editor that refuses to remove the last administrator or to take away your own access.
+* One dashboard per audience, built in the block editor, with the most specific one winning.
+* Sign-in, sign-out and registration redirects by audience, with a most-specific-wins order.
+* Redirect rules that begin or stop on a date.
+* Content restriction on any post or page, by role, by capability, by anybody signed in or by nobody.
+* Four ways to refuse: send to sign-in, show a message, 403 or 404 — per site and per page.
+* Excerpts, feeds, search results, REST responses and the sitemap covered by the same decision as the page.
+* wp-admin kept for the people who have business there, and closed to the people who do not.
+* Export and import the whole configuration as one file, adding rather than replacing.
+* A setup wizard that builds a sign-in page, a dashboard and a restricted page.
+* Nothing is deleted on deactivation, and nothing on uninstall unless you switch it on first.
+* No telemetry: the plugin contacts no server of ours, ever.
+* Italian translation included.
