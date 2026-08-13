@@ -64,16 +64,54 @@ final class Blueprint {
 	private array $dashboards;
 
 	/**
+	 * What add-ons put in, keyed by whoever put it there.
+	 *
+	 * Carried through untouched. The free plugin validates that this is a map of
+	 * arrays and nothing more: what is inside belongs to the add-on that wrote
+	 * it, and a plugin that tried to understand another's data would be the
+	 * wrong place for that knowledge to live.
+	 *
+	 * A site exporting with PRO installed and importing without it keeps the
+	 * section, unread, and applies it the day PRO is installed. Dropping it
+	 * would make an export quietly lossy in a way nobody would notice until
+	 * they needed it.
+	 *
+	 * @var array<string, array<string, mixed>>
+	 */
+	private array $extras;
+
+	/**
 	 * Build a blueprint.
 	 *
-	 * @param array<string, scalar>       $settings   The settings.
-	 * @param list<array<string, scalar>> $redirects  The redirect rules.
-	 * @param list<array<string, string>> $dashboards The dashboards.
+	 * @param array<string, scalar>               $settings   The settings.
+	 * @param list<array<string, scalar>>         $redirects  The redirect rules.
+	 * @param list<array<string, string>>         $dashboards The dashboards.
+	 * @param array<string, array<string, mixed>> $extras     What add-ons contributed.
 	 */
-	public function __construct( array $settings = array(), array $redirects = array(), array $dashboards = array() ) {
+	public function __construct( array $settings = array(), array $redirects = array(), array $dashboards = array(), array $extras = array() ) {
 		$this->settings   = $settings;
 		$this->redirects  = $redirects;
 		$this->dashboards = $dashboards;
+		$this->extras     = $extras;
+	}
+
+	/**
+	 * What add-ons contributed, keyed by whoever contributed it.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function extras(): array {
+		return $this->extras;
+	}
+
+	/**
+	 * One add-on's section, or an empty array.
+	 *
+	 * @param string $key Whose section.
+	 * @return array<string, mixed>
+	 */
+	public function extra( string $key ): array {
+		return isset( $this->extras[ $key ] ) && is_array( $this->extras[ $key ] ) ? $this->extras[ $key ] : array();
 	}
 
 	/**
@@ -104,7 +142,8 @@ final class Blueprint {
 		return new self(
 			self::clean_settings( $decoded['settings'] ?? array() ),
 			self::clean_redirects( $decoded['redirects'] ?? array() ),
-			self::clean_dashboards( $decoded['dashboards'] ?? array() )
+			self::clean_dashboards( $decoded['dashboards'] ?? array() ),
+			self::clean_extras( $decoded['extras'] ?? array() )
 		);
 	}
 
@@ -124,6 +163,7 @@ final class Blueprint {
 			'settings'   => $this->settings,
 			'redirects'  => $this->redirects,
 			'dashboards' => $this->dashboards,
+			'extras'     => $this->extras,
 		);
 
 		// json_encode and not wp_json_encode: this class stays free of WordPress so
@@ -173,6 +213,7 @@ final class Blueprint {
 			'settings'   => count( $this->settings ),
 			'redirects'  => count( $this->redirects ),
 			'dashboards' => count( $this->dashboards ),
+			'extras'     => count( $this->extras ),
 		);
 	}
 
@@ -243,9 +284,35 @@ final class Blueprint {
 	}
 
 	/**
-	 * Keep the dashboards that have a title.
+	 * Keep the add-on sections that look like sections.
 	 *
 	 * @param mixed $raw What the file said.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function clean_extras( $raw ): array {
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+
+		$clean = array();
+
+		foreach ( $raw as $key => $section ) {
+			// A key that is not a string, or a section that is not an array,
+			// cannot have come from an add-on following the contract. Dropped
+			// rather than passed on: what goes through here reaches code that
+			// trusts its own section's shape.
+			if ( is_string( $key ) && '' !== $key && is_array( $section ) ) {
+				$clean[ $key ] = $section;
+			}
+		}
+
+		return $clean;
+	}
+
+	/**
+	 * Narrow the dashboards to what can be read.
+	 *
+	 * @param mixed $raw What was in the document.
 	 * @return list<array<string, string>>
 	 */
 	private static function clean_dashboards( $raw ): array {

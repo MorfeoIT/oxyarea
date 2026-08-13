@@ -116,7 +116,30 @@ final class Porter {
 			);
 		}
 
-		$blueprint = new Blueprint( $this->settings->all(), $rules, $dashboards );
+		/**
+		 * What add-ons want kept in the export.
+		 *
+		 * Keyed by whoever is contributing — `oxyarea-pro` and so on — and
+		 * carried through this plugin untouched. A blueprint is a site's whole
+		 * configuration or it is a curiosity, and asking somebody to export
+		 * twice and remember which file was which is how a migration goes wrong.
+		 *
+		 * Files are deliberately not in it, here or anywhere: an export is a
+		 * configuration document, and the day it starts carrying a client's
+		 * contracts is the day emailing one becomes a disclosure.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param array<string, array<string, mixed>> $extras The sections gathered so far.
+		 */
+		$extras = apply_filters( 'oxyarea_blueprint_extras', array() );
+
+		$blueprint = new Blueprint(
+			$this->settings->all(),
+			$rules,
+			$dashboards,
+			is_array( $extras ) ? $extras : array()
+		);
 
 		return $blueprint->to_json( VERSION, gmdate( 'c' ) );
 	}
@@ -128,7 +151,7 @@ final class Porter {
 	 * would make "try this template" a one-way door.
 	 *
 	 * @param string $json The document.
-	 * @return array{settings: int, redirects: int, dashboards: int, skipped: list<string>}
+	 * @return array{settings: int, redirects: int, dashboards: int, skipped: list<string>, notes: list<string>}
 	 *
 	 * @throws InvalidArgumentException If the document cannot be read at all.
 	 */
@@ -140,9 +163,27 @@ final class Porter {
 			'redirects'  => 0,
 			'dashboards' => 0,
 			'skipped'    => array(),
+			'notes'      => array(),
 		);
 
 		$applied['settings'] = $this->import_settings( $blueprint->settings() );
+
+		/**
+		 * Let add-ons apply their own sections.
+		 *
+		 * Fired before this plugin's own rules and dashboards, so that anything
+		 * they refer to — a company a rule names — exists by the time the rule
+		 * is read.
+		 *
+		 * An add-on that is not installed simply does not listen, and its
+		 * section is left alone rather than dropped: the file still carries it,
+		 * and installing the add-on later applies it.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param array<string, array<string, mixed>> $extras What the document carried.
+		 */
+		do_action( 'oxyarea_blueprint_import_extras', $blueprint->extras() );
 
 		foreach ( $blueprint->redirects() as $rule ) {
 			$reason = $this->import_redirect( $rule );
@@ -164,7 +205,71 @@ final class Porter {
 
 		$this->dashboards->flush();
 
-		return $applied;
+		/**
+		 * The report an import is about to show.
+		 *
+		 * An add-on that applied a section of its own says here what it did and
+		 * what it had to leave out, so that the site owner reads one account of
+		 * the import rather than two. An add-on that reports nothing is an
+		 * add-on whose half of the file silently did not arrive.
+		 *
+		 * The shape is put back together afterwards: a filter that returns
+		 * something else, or a count that came back as a sentence, must not
+		 * become a fatal on the screen that was about to say the import worked.
+		 *
+		 * @since 0.1.0
+		 *
+		 * @param array{settings: int, redirects: int, dashboards: int, skipped: list<string>, notes: list<string>} $applied What this plugin did.
+		 */
+		return self::clean_report( apply_filters( 'oxyarea_blueprint_import_report', $applied ), $applied );
+	}
+
+	/**
+	 * Put a report back into the shape the screen expects.
+	 *
+	 * `skipped` and `notes` are two lists on purpose. What did not arrive turns
+	 * the notice red; what an add-on did arrive with does not. Sharing one list
+	 * would make a successful import look like a failed one, or a failed one
+	 * look successful, depending on which way the mistake went.
+	 *
+	 * @param mixed                                                                                             $filtered What came back from the filter.
+	 * @param array{settings: int, redirects: int, dashboards: int, skipped: list<string>, notes: list<string>} $applied What this plugin did.
+	 * @return array{settings: int, redirects: int, dashboards: int, skipped: list<string>, notes: list<string>}
+	 */
+	private static function clean_report( $filtered, array $applied ): array {
+		if ( ! is_array( $filtered ) ) {
+			return $applied;
+		}
+
+		return array(
+			'settings'   => isset( $filtered['settings'] ) && is_numeric( $filtered['settings'] ) ? (int) $filtered['settings'] : $applied['settings'],
+			'redirects'  => isset( $filtered['redirects'] ) && is_numeric( $filtered['redirects'] ) ? (int) $filtered['redirects'] : $applied['redirects'],
+			'dashboards' => isset( $filtered['dashboards'] ) && is_numeric( $filtered['dashboards'] ) ? (int) $filtered['dashboards'] : $applied['dashboards'],
+			'skipped'    => self::clean_lines( $filtered['skipped'] ?? array() ),
+			'notes'      => self::clean_lines( $filtered['notes'] ?? array() ),
+		);
+	}
+
+	/**
+	 * Keep the sentences, drop everything else.
+	 *
+	 * @param mixed $raw What the filter put there.
+	 * @return list<string>
+	 */
+	private static function clean_lines( $raw ): array {
+		if ( ! is_array( $raw ) ) {
+			return array();
+		}
+
+		$lines = array();
+
+		foreach ( $raw as $line ) {
+			if ( is_string( $line ) && '' !== trim( $line ) ) {
+				$lines[] = $line;
+			}
+		}
+
+		return $lines;
 	}
 
 	/**

@@ -173,6 +173,7 @@ final class BlueprintTest extends TestCase {
 				'settings'   => 2,
 				'redirects'  => 1,
 				'dashboards' => 1,
+				'extras'     => 0,
 			),
 			$blueprint->summary()
 		);
@@ -184,5 +185,51 @@ final class BlueprintTest extends TestCase {
 		$this->assertStringContainsString( '"plugin": "oxyarea"', $json );
 		$this->assertStringContainsString( '"version": "0.1.0"', $json );
 		$this->assertStringContainsString( '"format": 1', $json );
+	}
+
+	public function test_an_add_on_section_is_carried_through_untouched(): void {
+		// The free plugin validates that this is a map of arrays and nothing
+		// more. What is inside belongs to whoever wrote it, and a plugin that
+		// tried to understand another's data would be the wrong place for that
+		// knowledge to live.
+		$blueprint = Blueprint::from_json(
+			'{"format":1,"extras":{"oxyarea-pro":{"companies":[{"name":"ACME"}],"anything":{"nested":true}}}}'
+		);
+
+		$this->assertSame(
+			array(
+				'companies' => array( array( 'name' => 'ACME' ) ),
+				'anything'  => array( 'nested' => true ),
+			),
+			$blueprint->extra( 'oxyarea-pro' )
+		);
+	}
+
+	public function test_a_section_from_an_add_on_that_is_not_installed_survives_the_round_trip(): void {
+		// Dropping it would make an export quietly lossy: a site exporting with
+		// PRO and importing without it would lose its companies for good, and
+		// nobody would notice until they needed them.
+		$original = '{"format":1,"extras":{"somebody-else":{"a":1}}}';
+
+		$again = Blueprint::from_json( Blueprint::from_json( $original )->to_json() );
+
+		$this->assertSame( array( 'a' => 1 ), $again->extra( 'somebody-else' ) );
+	}
+
+	public function test_a_section_that_is_not_a_section_is_dropped(): void {
+		$blueprint = Blueprint::from_json(
+			'{"format":1,"extras":{"good":{"a":1},"bad":"not an array","":{"a":1}}}'
+		);
+
+		$this->assertSame( array( 'good' ), array_keys( $blueprint->extras() ) );
+	}
+
+	public function test_extras_that_are_not_a_map_read_as_none(): void {
+		$this->assertSame( array(), Blueprint::from_json( '{"format":1,"extras":"nonsense"}' )->extras() );
+		$this->assertSame( array(), Blueprint::from_json( '{"format":1}' )->extras() );
+	}
+
+	public function test_asking_for_a_section_nobody_wrote_gives_an_empty_one(): void {
+		$this->assertSame( array(), Blueprint::from_json( '{"format":1}' )->extra( 'oxyarea-pro' ) );
 	}
 }

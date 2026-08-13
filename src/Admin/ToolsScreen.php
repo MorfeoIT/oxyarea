@@ -157,6 +157,12 @@ final class ToolsScreen implements Registrable {
 			(int) $applied['dashboards']
 		);
 
+		// And what an add-on brought in beside it, on the same line. A second
+		// notice would read as a second import.
+		if ( array() !== $applied['notes'] ) {
+			$message .= ' ' . esc_html__( 'Also imported:', 'oxyarea' ) . ' ' . esc_html( implode( ' ', $applied['notes'] ) );
+		}
+
 		// What was skipped is said out loud. An import that quietly drops half the
 		// file is worse than one that fails, because the site owner walks away
 		// believing something untrue.
