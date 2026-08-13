@@ -12,6 +12,7 @@ namespace OxyArea\Redirect;
 use OxyArea\Access\AudienceResolver;
 use OxyArea\Access\Subject;
 use OxyArea\Auth\Destination;
+use OxyArea\Conditions\Context;
 use OxyArea\Infrastructure\Registrable;
 use OxyArea\Infrastructure\Settings;
 use OxyArea\Roles\Capabilities;
@@ -246,7 +247,29 @@ final class RedirectService implements Registrable {
 	 * @return string
 	 */
 	public function decide( string $event, int $user_id, string $fallback ): string {
-		return $this->decide_for_subjects( $event, $this->audience->subjects_for( $user_id ), $fallback );
+		// The context names the person the decision is *about*, which is not
+		// always the one making the request: signing out decides while the
+		// session still exists, and the preview asks about a role.
+		$context = new Context( $user_id, $event, $this->requested_destination() );
+
+		return $this->decide_for_subjects( $event, $this->audience->subjects_for( $user_id ), $fallback, $context );
+	}
+
+	/**
+	 * Where the browser was trying to go, when it said so.
+	 *
+	 * Filled here rather than left to add-ons, because this plugin has already
+	 * parsed and guarded the value and a second reader would be a second chance
+	 * to get an open redirect wrong. The condition that uses it receives a
+	 * destination this plugin has already agreed is on this site.
+	 *
+	 * @return string
+	 */
+	private function requested_destination(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading, not acting: the value is only ever compared, and it goes through the open-redirect guard first.
+		$raw = isset( $_REQUEST['redirect_to'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
+
+		return '' === $raw ? '' : Destination::make_safe( $raw, '' );
 	}
 
 	/**
@@ -255,10 +278,11 @@ final class RedirectService implements Registrable {
 	 * @param string        $event    The moment.
 	 * @param list<Subject> $subjects What the person counts as.
 	 * @param string        $fallback Where to go when no rule applies.
+	 * @param Context|null  $context  The facts of this request, for conditions.
 	 * @return string
 	 */
-	public function decide_for_subjects( string $event, array $subjects, string $fallback ): string {
-		$resolution = $this->resolve( $event, $subjects, $fallback );
+	public function decide_for_subjects( string $event, array $subjects, string $fallback, ?Context $context = null ): string {
+		$resolution = $this->resolve( $event, $subjects, $fallback, $context );
 
 		return Destination::make_safe( $resolution->destination(), $fallback );
 	}
@@ -271,9 +295,19 @@ final class RedirectService implements Registrable {
 	 * @param string        $event    The moment.
 	 * @param list<Subject> $subjects What the person counts as.
 	 * @param string        $fallback Where to go when no rule applies.
+	 * @param Context|null  $context  The facts of this request, for conditions.
 	 * @return Resolution
 	 */
-	public function resolve( string $event, array $subjects, string $fallback ): Resolution {
-		return $this->resolver->resolve( $event, $subjects, $this->rules->for_event( $event ), $fallback );
+	public function resolve( string $event, array $subjects, string $fallback, ?Context $context = null ): Resolution {
+		// A context is built here when the caller did not bring one, so that a
+		// rule with conditions works on every path rather than only on the ones
+		// somebody remembered to update. The user is the one the subjects were
+		// gathered for, which is not always the one making the request: the
+		// preview on the redirect screen asks about a role.
+		if ( null === $context ) {
+			$context = new Context( get_current_user_id(), $event );
+		}
+
+		return $this->resolver->resolve( $event, $subjects, $this->rules->for_event( $event ), $fallback, $context );
 	}
 }

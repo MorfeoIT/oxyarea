@@ -27,7 +27,7 @@ final class Migrator {
 	/**
 	 * The schema version this code expects.
 	 */
-	public const TARGET_VERSION = 2;
+	public const TARGET_VERSION = 3;
 
 	/**
 	 * The assignments table, without the WordPress prefix.
@@ -107,6 +107,13 @@ final class Migrator {
 			2 => function (): void {
 				$this->create_redirect_rules_table();
 			},
+			// dbDelta adds a column to a table that already exists, so running
+			// the same CREATE TABLE again is the migration. Nothing else is
+			// needed: a rule written before this column reads back as a rule
+			// with no conditions, which is what it is.
+			3 => function (): void {
+				$this->create_redirect_rules_table();
+			},
 		);
 	}
 
@@ -181,6 +188,7 @@ final class Migrator {
 			subject_type varchar(32) NOT NULL DEFAULT '',
 			subject_id varchar(191) NOT NULL DEFAULT '',
 			destination text NOT NULL,
+			conditions text NULL,
 			priority smallint(5) NOT NULL DEFAULT 10,
 			enabled tinyint(1) unsigned NOT NULL DEFAULT 1,
 			created_at datetime NOT NULL DEFAULT '0000-00-00 00:00:00',

@@ -13,6 +13,7 @@ use Exception;
 use OxyArea\Access\Subject;
 use OxyArea\Infrastructure\Migrator;
 use OxyArea\Redirect\RedirectEvent;
+use OxyArea\Conditions\Specifications;
 use OxyArea\Redirect\RedirectRule;
 use OxyArea\Redirect\RuleRepositoryInterface;
 
@@ -100,9 +101,10 @@ final class RedirectRuleRepository implements RuleRepositoryInterface {
 			'destination'  => $rule->destination(),
 			'priority'     => $rule->priority(),
 			'enabled'      => $rule->is_enabled() ? 1 : 0,
+			'conditions'   => Specifications::encode( $rule->conditions() ),
 		);
 
-		$formats = array( '%s', '%s', '%s', '%s', '%d', '%d' );
+		$formats = array( '%s', '%s', '%s', '%s', '%d', '%d', '%s' );
 		$table   = Migrator::table( Migrator::TABLE_REDIRECT_RULES );
 
 		if ( $rule->id() > 0 ) {
@@ -205,7 +207,8 @@ final class RedirectRuleRepository implements RuleRepositoryInterface {
 				(string) ( $row['destination'] ?? '' ),
 				(int) ( $row['priority'] ?? 10 ),
 				1 === (int) ( $row['enabled'] ?? 1 ),
-				(int) ( $row['id'] ?? 0 )
+				(int) ( $row['id'] ?? 0 ),
+				Specifications::decode( $row['conditions'] ?? null )
 			);
 		} catch ( Exception $e ) {
 			unset( $e );

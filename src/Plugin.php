@@ -15,6 +15,7 @@ use OxyArea\Access\AssignmentRepositoryInterface;
 use OxyArea\Access\AudienceProviderInterface;
 use OxyArea\Access\AudienceResolver;
 use OxyArea\Access\SubjectCodec;
+use OxyArea\Conditions\Registry as ConditionRegistry;
 use OxyArea\Access\HookedAccessResolver;
 use OxyArea\Admin\DashboardPreviewScreen;
 use OxyArea\Admin\Menu;
@@ -183,6 +184,14 @@ final class Plugin {
 	 * Service identifier of the redirect engine.
 	 */
 	public const REDIRECT_RESOLVER = 'redirect.resolver';
+
+	/**
+	 * The conditions this site can judge.
+	 *
+	 * Empty in the free plugin, which ships no condition types: every one
+	 * anybody has asked for belongs to an add-on. What lives here is the seam.
+	 */
+	public const CONDITIONS = 'conditions.registry';
 
 	/**
 	 * Service identifier of the service that wires the engine to WordPress.
@@ -356,6 +365,11 @@ final class Plugin {
 		$container->set(
 			self::ASSIGNMENTS,
 			static fn (): AssignmentRepository => new AssignmentRepository()
+		);
+
+		$container->set(
+			self::CONDITIONS,
+			static fn (): ConditionRegistry => new ConditionRegistry()
 		);
 
 		$container->set(
@@ -552,7 +566,9 @@ final class Plugin {
 
 		$container->set(
 			self::REDIRECT_RESOLVER,
-			static fn (): RedirectResolver => new RedirectResolver()
+			static fn ( Container $c ): RedirectResolver => new RedirectResolver(
+				$c->get_typed( self::CONDITIONS, ConditionRegistry::class )
+			)
 		);
 
 		$container->set(

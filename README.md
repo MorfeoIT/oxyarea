@@ -118,6 +118,7 @@ What the contract covers:
 | Decisions | `oxyarea_access_decision` — observe or override a verdict, with its reasoning |
 | Subjects | `oxyarea_subject_decode` / `_encode` / `_label` — round-trip and name a kind of subject this plugin has never heard of |
 | Screens | `oxyarea_subject_controls` to draw your own control on the three audience screens, `oxyarea_subject_values` to contribute what it collected |
+| Conditions | `oxyarea_conditions` — contribute a `ConditionInterface`, and a rule can carry "only when…" |
 | Interfaces | `Access\*Interface`, `Dashboard\*Interface`, `Redirect\RuleRepositoryInterface`, `Infrastructure\ClockInterface` |
 | Windows | `Assignment::starts_at()` / `ends_at()` — a rule that begins or stops on a date, stored and enforced |
 | Events | `oxyarea_init`, `oxyarea_role_*`, `oxyarea_user_role_assigned`, `oxyarea_password_reset*`, `oxyarea_content_refused`, `oxyarea_dashboard_rendered`, `oxyarea_*_destination`, `oxyarea_unauthorised_behaviour`, `oxyarea_brand_*` |
@@ -125,6 +126,19 @@ What the contract covers:
 The major rises when something there is removed or changes meaning, so an add-on
 built against the old contract refuses to load rather than failing halfway
 through a request. The minor rises when something is added.
+
+`Conditions\` is the seam for tests a rule carries. A condition is **not** a
+subject: a subject says who somebody is and decides how specific the rule is; a
+condition says what this request is like and has no specificity at all. So a rule
+applies when its subject matches **and** every condition holds, and the ordering
+afterwards is unchanged.
+
+The free plugin ships **no condition types**, deliberately: every one anybody has
+asked for — a first sign-in, the page they wanted, a value on their account, an
+order in a shop — belongs to an add-on. And a condition this site cannot judge
+makes its rule **not apply**, rather than apply to everybody: deactivating the
+add-on that provided "only on their first sign-in" must not start sending every
+customer where one of them was meant to go.
 
 `Access\SubjectCodec` is the one parser for the strings a form field carries —
 `authenticated`, `role:editor`, and whatever an add-on adds. The property to

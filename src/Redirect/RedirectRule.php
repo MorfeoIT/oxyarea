@@ -71,14 +71,22 @@ final class RedirectRule {
 	private bool $enabled;
 
 	/**
+	 * Extra tests that must all hold, as stored.
+	 *
+	 * @var list<array{type: string, value: string}>
+	 */
+	private array $conditions;
+
+	/**
 	 * Build a rule.
 	 *
-	 * @param string       $event       Which moment this rule is about.
-	 * @param Subject|null $subject     Who it is about, or null for the event's fallback.
-	 * @param string       $destination Where they should land.
-	 * @param int          $priority    Tie-breaker, lower first.
-	 * @param bool         $enabled     Whether it counts.
-	 * @param int          $id          Identifier, or 0 when not yet stored.
+	 * @param string                                   $event       Which moment this rule is about.
+	 * @param Subject|null                             $subject     Who it is about, or null for the event's fallback.
+	 * @param string                                   $destination Where they should land.
+	 * @param int                                      $priority    Tie-breaker, lower first.
+	 * @param bool                                     $enabled     Whether it counts.
+	 * @param int                                      $id          Identifier, or 0 when not yet stored.
+	 * @param list<array{type: string, value: string}> $conditions Extra tests that must all hold.
 	 *
 	 * @throws InvalidArgumentException If the event is not one OxyArea knows, or the destination is empty.
 	 */
@@ -88,7 +96,8 @@ final class RedirectRule {
 		string $destination,
 		int $priority = 10,
 		bool $enabled = true,
-		int $id = 0
+		int $id = 0,
+		array $conditions = array()
 	) {
 		if ( ! RedirectEvent::exists( $event ) ) {
 			throw new InvalidArgumentException(
@@ -108,6 +117,23 @@ final class RedirectRule {
 		$this->priority    = $priority;
 		$this->enabled     = $enabled;
 		$this->id          = $id;
+		$this->conditions  = $conditions;
+	}
+
+	/**
+	 * The extra tests this rule carries.
+	 *
+	 * Separate from the subject on purpose. A subject decides how *specific* the
+	 * rule is and the whole ordering rests on that; a condition has no
+	 * specificity — "on their first sign-in" is not more or less specific than
+	 * "coming from the checkout", it is another hurdle. So a rule applies when
+	 * its subject matches **and** every condition holds, and the ordering
+	 * afterwards is unchanged.
+	 *
+	 * @return list<array{type: string, value: string}>
+	 */
+	public function conditions(): array {
+		return $this->conditions;
 	}
 
 	/**
@@ -233,6 +259,6 @@ final class RedirectRule {
 	 * @return self
 	 */
 	public function with_id( int $id ): self {
-		return new self( $this->event, $this->subject, $this->destination, $this->priority, $this->enabled, $id );
+		return new self( $this->event, $this->subject, $this->destination, $this->priority, $this->enabled, $id, $this->conditions );
 	}
 }

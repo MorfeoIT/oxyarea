@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace OxyArea\Redirect;
 
 use OxyArea\Access\Subject;
+use OxyArea\Conditions\Context;
+use OxyArea\Conditions\Registry;
 
 /*
  * Pure, like the access resolver and the redirect guard. The ordering rules
@@ -41,16 +43,38 @@ use OxyArea\Access\Subject;
 final class RedirectResolver {
 
 	/**
+	 * Which conditions this site can judge, or null when nothing judges them.
+	 *
+	 * Optional so that everything written before conditions existed still
+	 * constructs. A resolver without a registry treats every rule as having no
+	 * conditions — which is exactly what a rule written before this column had
+	 * anyway.
+	 *
+	 * @var Registry|null
+	 */
+	private ?Registry $conditions;
+
+	/**
+	 * Build the resolver.
+	 *
+	 * @param Registry|null $conditions Which conditions this site can judge.
+	 */
+	public function __construct( ?Registry $conditions = null ) {
+		$this->conditions = $conditions;
+	}
+
+	/**
 	 * Decide where somebody goes.
 	 *
 	 * @param string             $event    The moment.
 	 * @param list<Subject>      $subjects What the person counts as.
 	 * @param list<RedirectRule> $rules The rules to consider.
 	 * @param string             $fallback Where to go when no rule applies.
+	 * @param Context|null       $context  The facts of this request, for conditions.
 	 * @return Resolution
 	 */
-	public function resolve( string $event, array $subjects, array $rules, string $fallback ): Resolution {
-		$candidates = $this->candidates( $event, $subjects, $rules );
+	public function resolve( string $event, array $subjects, array $rules, string $fallback, ?Context $context = null ): Resolution {
+		$candidates = $this->candidates( $event, $subjects, $rules, $context );
 
 		if ( array() === $candidates ) {
 			return new Resolution( $fallback );
@@ -67,9 +91,10 @@ final class RedirectResolver {
 	 * @param string             $event    The moment.
 	 * @param list<Subject>      $subjects What the person counts as.
 	 * @param list<RedirectRule> $rules    The rules to consider.
+	 * @param Context|null       $context  The facts of this request, for conditions.
 	 * @return list<RedirectRule>
 	 */
-	public function candidates( string $event, array $subjects, array $rules ): array {
+	public function candidates( string $event, array $subjects, array $rules, ?Context $context = null ): array {
 		$matching = array();
 
 		foreach ( $rules as $rule ) {
@@ -81,14 +106,52 @@ final class RedirectResolver {
 				continue;
 			}
 
-			if ( $this->applies_to( $rule, $subjects ) ) {
-				$matching[] = $rule;
+			if ( ! $this->applies_to( $rule, $subjects ) ) {
+				continue;
 			}
+
+			// Conditions are judged after the audience and before the ordering,
+			// and that position is the whole design. They narrow *whether* a
+			// rule applies; they contribute nothing to how specific it is. A
+			// rule about Mario on his first sign-in is exactly as specific as a
+			// rule about Mario — it simply applies less often.
+			if ( ! $this->conditions_hold( $rule, $context ) ) {
+				continue;
+			}
+
+			$matching[] = $rule;
 		}
 
 		usort( $matching, array( $this, 'compare' ) );
 
 		return $matching;
+	}
+
+	/**
+	 * Whether every condition a rule carries holds.
+	 *
+	 * A rule with conditions on a site that cannot judge them does not apply.
+	 * The alternative — treating an unanswerable condition as satisfied — would
+	 * quietly widen the rule: deactivate the add-on that provided "first sign-in
+	 * only" and everybody starts being sent where only first-timers were meant
+	 * to go, with nothing on any screen saying why.
+	 *
+	 * @param RedirectRule $rule    The rule.
+	 * @param Context|null $context The facts, when there are any.
+	 * @return bool
+	 */
+	private function conditions_hold( RedirectRule $rule, ?Context $context ): bool {
+		$specifications = $rule->conditions();
+
+		if ( array() === $specifications ) {
+			return true;
+		}
+
+		if ( null === $this->conditions || null === $context ) {
+			return false;
+		}
+
+		return $this->conditions->satisfied( $specifications, $context );
 	}
 
 	/**
