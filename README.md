@@ -119,6 +119,7 @@ What the contract covers:
 | Subjects | `oxyarea_subject_decode` / `_encode` / `_label` — round-trip and name a kind of subject this plugin has never heard of |
 | Screens | `oxyarea_subject_controls` to draw your own control on the three audience screens, `oxyarea_subject_values` to contribute what it collected |
 | Interfaces | `Access\*Interface`, `Dashboard\*Interface`, `Redirect\RuleRepositoryInterface`, `Infrastructure\ClockInterface` |
+| Windows | `Assignment::starts_at()` / `ends_at()` — a rule that begins or stops on a date, stored and enforced |
 | Events | `oxyarea_init`, `oxyarea_role_*`, `oxyarea_user_role_assigned`, `oxyarea_password_reset*`, `oxyarea_content_refused`, `oxyarea_dashboard_rendered`, `oxyarea_*_destination`, `oxyarea_unauthorised_behaviour`, `oxyarea_brand_*` |
 
 The major rises when something there is removed or changes meaning, so an add-on

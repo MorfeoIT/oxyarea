@@ -142,6 +142,31 @@ final class Assignment {
 	}
 
 	/**
+	 * When the rule starts counting, or null for "always has".
+	 *
+	 * Exposed so that the rule can be *stored*, which sounds obvious and was
+	 * missing for six sprints. The window was validated here, filtered by the
+	 * resolver and read back by the repository — and the repository's write path
+	 * had no way to ask for it, so it wrote null and every expiry a site set was
+	 * silently discarded. Nothing noticed because nothing in the free plugin sets
+	 * a window; the first thing that did was PRO's file vault.
+	 *
+	 * @return DateTimeImmutable|null
+	 */
+	public function starts_at(): ?DateTimeImmutable {
+		return $this->starts_at;
+	}
+
+	/**
+	 * When the rule stops counting, or null for "never does".
+	 *
+	 * @return DateTimeImmutable|null
+	 */
+	public function ends_at(): ?DateTimeImmutable {
+		return $this->ends_at;
+	}
+
+	/**
 	 * Whether the rule counts at a given moment.
 	 *
 	 * Both ends are inclusive. A window whose end precedes its start never

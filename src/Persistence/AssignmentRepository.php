@@ -143,8 +143,8 @@ final class AssignmentRepository implements AssignmentRepositoryInterface {
 					'resource_id'   => $target->get_id(),
 					'effect'        => $assignment->is_deny() ? self::EFFECT_DENY : self::EFFECT_ALLOW,
 					'priority'      => $assignment->priority(),
-					'starts_at'     => null,
-					'ends_at'       => null,
+					'starts_at'     => $this->from_date( $assignment->starts_at() ),
+					'ends_at'       => $this->from_date( $assignment->ends_at() ),
 					'created_at'    => $now,
 				),
 				array( '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%s' )
@@ -188,9 +188,26 @@ final class AssignmentRepository implements AssignmentRepositoryInterface {
 	}
 
 	/**
-	 * Read a stored datetime as UTC.
+	 * Write a moment as the column stores it.
 	 *
-	 * @param mixed $value The stored value.
+	 * @param DateTimeImmutable|null $moment The moment, or null.
+	 * @return string|null
+	 */
+	private function from_date( ?DateTimeImmutable $moment ): ?string {
+		if ( null === $moment ) {
+			return null;
+		}
+
+		// Stored in UTC whatever the site's timezone is, because the column is
+		// compared against gmdate() and a rule that expires "at midnight" should
+		// mean the same thing after somebody changes the site's timezone.
+		return $moment->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * Turn a stored value into a moment, or nothing.
+	 *
+	 * @param mixed $value What was in the column.
 	 * @return DateTimeImmutable|null
 	 */
 	private function to_date( $value ): ?DateTimeImmutable {

@@ -48,7 +48,7 @@ const MIN_WP      = '6.5';
  * failing halfway through a request. Raise the minor when something is added and
  * everything already written keeps working.
  */
-const API_VERSION = '1.1';
+const API_VERSION = '1.2';
 
 /**
  * Absolute path to the plugin directory, with a trailing slash.
