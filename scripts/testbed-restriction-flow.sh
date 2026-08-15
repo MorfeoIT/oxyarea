@@ -16,7 +16,16 @@ USERNAME=webtest
 ROOT=/home/${USERNAME}/web/test.44123.it/public_html/oxyarea
 SITE=https://test.44123.it/oxyarea
 CREDS=/home/${USERNAME}/oxyarea-testbed-credentials.txt
-BASIC=oxysoft:LA-COPPIA-STA-IN-UN-FILE-PROTETTO
+# La coppia dell'autenticazione del dominio non sta in questo file: si legge da
+# /home/webtest/.basic-44123 (chmod 600), e la variabile d'ambiente la scavalca.
+# Un repository non e' il posto di una password, e la storia di git diventa
+# pubblica tutta insieme, non solo l'ultimo commit.
+BASIC=${BASIC:-$(cat "${BASIC_FILE:-/home/webtest/.basic-44123}" 2>/dev/null)}
+
+if [ -z "$BASIC" ]; then
+	echo "non trovo la coppia del dominio: passa BASIC=utente:password" >&2
+	exit 1
+fi
 JAR=$(mktemp)
 OUT=$(mktemp)
 
