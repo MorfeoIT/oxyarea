@@ -4,7 +4,7 @@ Tags: client portal, private area, user dashboard, login redirect, content restr
 Requires at least: 6.5
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ the plugin off removes nothing at all.
 7. Settings. Five of them, and the only one that can lose work says so plainly.
 
 == Changelog ==
+
+= 0.1.1 =
+* Italian translation included: 272 strings, in the words the screens actually use.
 
 = 0.1.0 =
 * First public release.

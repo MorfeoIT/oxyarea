@@ -3,7 +3,7 @@
  * Plugin Name:       OxyArea – Private Client Area & User Portal
  * Plugin URI:        https://oxywp.com/oxyarea/
  * Description:       Build a complete private client area in WordPress: frontend login, roles, role dashboards, post-login redirects and content restriction, without assembling five plugins.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Author:            Oxysoft
@@ -25,7 +25,7 @@ use OxyArea\Infrastructure\Deactivator;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION     = '0.1.0';
+const VERSION     = '0.1.1';
 const PLUGIN_FILE = __FILE__;
 const MIN_PHP     = '8.1';
 const MIN_WP      = '6.5';
